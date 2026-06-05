@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>MaintenanceFlow PRO | Direct Dashboard</title>
+  <title>MaintenanceFlow PRO | Full‑Stack Demo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
@@ -62,6 +62,9 @@
     .dispatch-card, .amc-item { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(2px); }
     .modal-content { background: var(--surface); max-width: 500px; width: 90%; border-radius: var(--radius); padding: 28px; }
+    .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+    .add-service-btn { margin-top: 8px; width: 100%; background: transparent; border: 1px dashed var(--border); padding: 6px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; }
+    .add-service-btn:hover { background: var(--surface-2); }
     @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2,1fr); } .main-grid, .bottom-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -70,9 +73,8 @@
 
 <script>
   const API_BASE = window.location.origin + '/api';
-  // Fake admin user (no login)
-  const currentUser = { email: 'admin@maintain.com', role: 'admin', name: 'Admin (Demo)' };
-  let authToken = 'fake-token-for-testing';
+  let currentUser = { email: 'admin@maintain.com', role: 'admin', name: 'Demo Admin' };
+  let authToken = 'demo-token';
   let jobsChart = null;
 
   async function apiFetch(endpoint, options = {}) {
@@ -113,12 +115,10 @@
       const app = document.getElementById('app');
       app.innerHTML = `
         <div class="container">
-          <div class="demo-banner">
-            🔧 <strong>DIRECT DASHBOARD MODE</strong> — Login bypassed for testing. API is being called directly.
-          </div>
+          <div class="demo-banner">🔧 <strong>LIVE DEMO</strong> — MaintenanceFlow PRO. Full‑stack CMMS with real database.</div>
           <div class="dashboard-header" style="display:flex; justify-content:space-between; padding:20px; background:var(--surface); border-radius:var(--radius); margin-bottom:20px;">
-            <div><h1>Maintenance<span style="color:var(--accent)">Flow</span> PRO</h1><div style="font-size:0.7rem;">Direct Mode | No Login</div></div>
-            <div><span>👤 ${currentUser.name} (admin)</span> <button id="refreshBtn" class="btn-secondary">⟳ Refresh</button></div>
+            <div><h1>Maintenance<span style="color:var(--accent)">Flow</span> PRO</h1><div style="font-size:0.7rem;">CMMS for Property & Facility Teams</div></div>
+            <div><span>👤 ${currentUser.name}</span> <button id="refreshBtn" class="btn-secondary">⟳ Refresh</button></div>
           </div>
           <div class="stats-grid" id="statsGrid"></div>
           <div class="main-grid">
@@ -129,7 +129,7 @@
             <div class="card"><div class="card-header"><div class="card-title">📑 AMC Contracts</div><button id="newAmcBtn" class="btn-secondary">+ Add</button></div><div id="amcList"></div></div>
             <div class="card"><div class="card-header"><div class="card-title">📊 Dashboard</div><button id="exportCsvBtn" class="btn-secondary">Export CSV</button></div><canvas id="revenueChart" height="120"></canvas><div id="kpiMini"></div></div>
           </div>
-          <div class="card"><div class="card-header"><div class="card-title">📄 Recent Invoices</div><button id="createInvoiceBtn" class="btn-secondary">+ Invoice</button></div><table><thead><tr><th>Client</th><th>Description</th><th>Amount</th><th>Date</th><th>PDF</th></tr></thead><tbody id="invoiceBody"></tbody></table></div>
+          <div class="card"><div class="card-header"><div class="card-title">📄 Recent Invoices</div><button id="createInvoiceBtn" class="btn-secondary">+ Invoice</button></div> <table id="invoiceTable"><thead><tr><th>Client</th><th>Description</th><th>Amount</th><th>Date</th><th>PDF</th></tr></thead><tbody id="invoiceBody"></tbody></table></div>
         </div>
       `;
 
@@ -140,7 +140,6 @@
         <div class="stat-card"><div class="stat-label">Revenue (AED)</div><div class="stat-value">${totalRevenue.toLocaleString()}</div></div>
       `;
 
-      // Jobs table
       const jobsBody = document.getElementById('jobsBody');
       jobsBody.innerHTML = '';
       jobs.forEach(job => {
@@ -156,7 +155,6 @@
         actionCell.querySelector('.delete-job').onclick = async () => { await apiFetch(`/jobs/${job.id}`, { method: 'DELETE' }); renderDashboard(); };
       });
 
-      // Technicians
       const dispatchDiv = document.getElementById('dispatchList');
       dispatchDiv.innerHTML = '';
       techs.forEach(tech => {
@@ -164,11 +162,9 @@
         dispatchDiv.innerHTML += `<div class="dispatch-card"><div><strong>${tech.name}</strong><div style="font-size:0.7rem;">${tech.role}</div></div><div>${assigned} jobs</div></div>`;
       });
 
-      // AMCs
       const amcDiv = document.getElementById('amcList');
       amcDiv.innerHTML = amcs.map(a => `<div class="amc-item"><div><strong>${a.client_name}</strong><div style="font-size:0.7rem;">Exp: ${a.expiry}</div></div><div>${a.visits_per_year}/year <span class="badge">${a.status}</span></div></div>`).join('');
 
-      // Invoices
       const invBody = document.getElementById('invoiceBody');
       invBody.innerHTML = '';
       invoices.forEach(inv => {
@@ -181,30 +177,57 @@
         row.cells[4].querySelector('button').onclick = () => generatePDFInvoice(inv.client_name, inv.description, inv.amount);
       });
 
-      // Chart
       const ctx = document.getElementById('revenueChart').getContext('2d');
       if (jobsChart) jobsChart.destroy();
       const last6 = invoices.slice(-6);
       jobsChart = new Chart(ctx, { type: 'bar', data: { labels: last6.map(i => i.date), datasets: [{ label: 'Amount (AED)', data: last6.map(i => i.amount), backgroundColor: '#d4500a' }] } });
       document.getElementById('kpiMini').innerHTML = `<div>Total Invoices: ${invoices.length}</div><div>Collected: AED ${totalRevenue.toLocaleString()}</div>`;
 
-      // Event listeners
-      document.getElementById('newJobBtn').onclick = () => showJobModal(clients, techs);
+      // Load services for dropdown
+      const services = await apiFetch('/services');
+      
+      document.getElementById('newJobBtn').onclick = () => showJobModal(clients, techs, services);
       document.getElementById('newAmcBtn').onclick = () => showAmcModal(clients);
       document.getElementById('createInvoiceBtn').onclick = () => showInvoiceModal(clients);
       document.getElementById('exportCsvBtn').onclick = () => exportCSV(jobs, amcs, invoices);
       document.getElementById('refreshBtn').onclick = () => renderDashboard();
     } catch (err) {
-      console.error('Dashboard error:', err);
-      document.getElementById('app').innerHTML = `<div style="color:red; padding:40px; text-align:center;">❌ Failed to load data. Is the backend running?<br><br>Error: ${err.message}<br><br>Make sure you have run <code>npm start</code> in the terminal.</div>`;
+      console.error(err);
+      document.getElementById('app').innerHTML = `<div style="color:red; padding:40px; text-align:center;">❌ Backend not reachable. Please ensure the API server is running at ${API_BASE}.</div>`;
     }
   }
 
-  // Helper modals (same as before, but using apiFetch)
-  async function showJobModal(clients, techs) {
+  async function showJobModal(clients, techs, services) {
     const modal = document.createElement('div'); modal.className = 'modal'; modal.style.display = 'flex';
-    modal.innerHTML = `<div class="modal-content"><h3>New Job</h3><select id="jobClient"><option>Select Client</option>${clients.map(c => `<option value="${c.id}">${c.name}</option>`)}</select><input id="jobService" placeholder="Service"><select id="jobPriority"><option>High</option><option>Medium</option><option>Low</option></select><select id="jobTech"><option>Select Tech</option>${techs.map(t => `<option>${t.name}</option>`)}</select><div class="modal-actions"><button id="cancelBtn">Cancel</button><button id="saveBtn">Create</button></div></div>`;
+    modal.innerHTML = `
+      <div class="modal-content">
+        <h3>New Job</h3>
+        <select id="jobClient" required>
+          <option value="">Select Client</option>
+          ${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+        </select>
+        <select id="jobService" required>
+          <option value="">Select Service</option>
+          ${services.map(s => `<option value="${s.name}">${s.name}</option>`).join('')}
+        </select>
+        <button type="button" id="addServiceBtn" class="add-service-btn">+ Add New Service</button>
+        <select id="jobPriority">
+          <option>High</option>
+          <option>Medium</option>
+          <option>Low</option>
+        </select>
+        <select id="jobTech" required>
+          <option value="">Select Tech</option>
+          ${techs.map(t => `<option>${t.name}</option>`).join('')}
+        </select>
+        <div class="modal-actions">
+          <button id="cancelBtn" class="btn-secondary">Cancel</button>
+          <button id="saveBtn" class="btn-primary">Create</button>
+        </div>
+      </div>
+    `;
     document.body.appendChild(modal);
+    
     document.getElementById('cancelBtn').onclick = () => modal.remove();
     document.getElementById('saveBtn').onclick = async () => {
       const clientId = document.getElementById('jobClient').value;
@@ -212,10 +235,19 @@
       const service = document.getElementById('jobService').value;
       const priority = document.getElementById('jobPriority').value;
       const tech = document.getElementById('jobTech').value;
-      if (!clientId || !service || !tech) return alert('Fill all');
+      if (!clientId || !service || !tech) return alert('Fill all fields');
       await apiFetch('/jobs', { method: 'POST', body: JSON.stringify({ customerId: clientId, customerName: client.name, service, technician: tech, priority, status: 'Assigned' }) });
       modal.remove();
       renderDashboard();
+    };
+    
+    document.getElementById('addServiceBtn').onclick = async () => {
+      const newService = prompt('Enter new service name:');
+      if (newService && newService.trim()) {
+        await apiFetch('/services', { method: 'POST', body: JSON.stringify({ name: newService.trim() }) });
+        renderDashboard(); // Refresh to load new service list
+        modal.remove();
+      }
     };
   }
 
@@ -252,7 +284,6 @@
     };
   }
 
-  // Start the dashboard immediately
   renderDashboard();
 </script>
 </body>
