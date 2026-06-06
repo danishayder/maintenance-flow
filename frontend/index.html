@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>MaintenanceFlow PRO | CMMS for Facility Teams</title>
+  <title>MaintenanceFlow PRO | HVAC • MEP • Electrical • Plumbing • Civil</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
@@ -50,6 +50,7 @@
     .dashboard-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; background: var(--surface); border-radius: var(--radius); padding: 20px 28px; margin-bottom: 24px; border: 1px solid var(--border); }
     .logo-area h1 { font-family: 'Syne', sans-serif; font-size: 1.6rem; }
     .logo-area span { color: var(--accent); }
+    .logo-area .tagline { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
     .user-info { display: flex; gap: 16px; align-items: center; }
     .badge-role { background: var(--surface-2); padding: 6px 14px; border-radius: 40px; font-size: 0.8rem; }
     .stats-grid, .main-grid, .bottom-grid { display: grid; gap: 20px; margin-bottom: 24px; }
@@ -82,13 +83,11 @@
   let authToken = null;
   let jobsChart = null;
 
-  // Helper: API fetch with authentication
   async function apiFetch(endpoint, options = {}) {
     const headers = { 'Content-Type': 'application/json', ...options.headers };
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
     const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
     if (res.status === 401) {
-      // Token expired or invalid
       logout();
       throw new Error('Session expired. Please login again.');
     }
@@ -104,7 +103,6 @@
     renderLogin();
   }
 
-  // Login/Signup/Demo functions
   async function login(email, password) {
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
@@ -149,17 +147,15 @@
     renderDashboard();
   }
 
-  // Render Login/Signup screen
   function renderLogin() {
-    let mode = 'login'; // 'login' or 'signup'
-    
+    let mode = 'login';
     function updateForm() {
       const app = document.getElementById('app');
       if (mode === 'login') {
         app.innerHTML = `
           <div class="auth-container">
             <h2>🔧 MaintenanceFlow PRO</h2>
-            <div class="sub">Sign in to access your dashboard</div>
+            <div class="sub">HVAC • MEP • Electrical • Plumbing • Civil Maintenance</div>
             <button class="demo-btn" id="demoBtn">🚀 Try Demo (No registration)</button>
             <div style="text-align: center; margin: 12px 0;">or</div>
             <div class="input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="you@company.com"></div>
@@ -182,7 +178,7 @@
         app.innerHTML = `
           <div class="auth-container">
             <h2>🔧 MaintenanceFlow PRO</h2>
-            <div class="sub">Create your account</div>
+            <div class="sub">HVAC • MEP • Electrical • Plumbing • Civil Maintenance</div>
             <div class="input-group"><label>Company Name</label><input type="text" id="signupCompany" placeholder="Your company name"></div>
             <div class="input-group"><label>Email</label><input type="email" id="signupEmail" placeholder="you@company.com"></div>
             <div class="input-group"><label>Password</label><input type="password" id="signupPassword"></div>
@@ -206,7 +202,6 @@
     updateForm();
   }
 
-  // PDF generation
   function generatePDFInvoice(client, desc, amount) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -225,7 +220,6 @@
     const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'export.csv'; a.click(); URL.revokeObjectURL(blob);
   }
 
-  // Main Dashboard
   async function renderDashboard() {
     try {
       const [jobs, amcs, invoices, clients, techs, services] = await Promise.all([
@@ -234,24 +228,28 @@
       const openJobs = jobs.filter(j => j.status !== 'Completed').length;
       const totalRevenue = invoices.reduce((s,i) => s + i.amount, 0);
       const activeTechs = techs.filter(t => t.active).length;
+      const isAdmin = currentUser.role === 'admin';
 
       const app = document.getElementById('app');
       app.innerHTML = `
         <div class="container">
           <div class="dashboard-header">
-            <div class="logo-area"><h1>Maintenance<span style="color:var(--accent)">Flow</span> PRO</h1><div style="font-size:0.7rem;">CMMS for Property & Facility Teams</div></div>
+            <div class="logo-area">
+              <h1>Maintenance<span style="color:var(--accent)">Flow</span> PRO</h1>
+              <div class="tagline">HVAC • MEP • Electrical • Plumbing • Civil Maintenance</div>
+            </div>
             <div class="user-info"><span class="badge-role">👤 ${currentUser.company_name} (${currentUser.role})</span><button id="logoutBtn" class="btn-secondary">Logout</button></div>
           </div>
           <div class="stats-grid" id="statsGrid"></div>
           <div class="main-grid">
-            <div class="card"><div class="card-header"><div class="card-title">📋 Service Jobs</div><button id="newJobBtn" class="btn-secondary">+ New Job</button></div> <table id="jobsTable"><thead><tr><th>Customer</th><th>Service</th><th>Technician</th><th>Priority</th><th>Status</th><th>Actions</th></tr></thead><tbody id="jobsBody"></tbody><table></div>
+            <div class="card"><div class="card-header"><div class="card-title">📋 Service Jobs</div>${isAdmin ? '<button id="newJobBtn" class="btn-secondary">+ New Job</button>' : ''}</div> <table id="jobsTable"><thead><tr><th>Customer</th><th>Service</th><th>Technician</th><th>Priority</th><th>Status</th><th>Actions</th></tr></thead><tbody id="jobsBody"></tbody></table></div>
             <div class="card"><div class="card-header"><div class="card-title">👨‍🔧 Technicians</div></div><div id="dispatchList"></div></div>
           </div>
           <div class="bottom-grid">
-            <div class="card"><div class="card-header"><div class="card-title">📑 AMC Contracts</div><button id="newAmcBtn" class="btn-secondary">+ Add</button></div><div id="amcList"></div></div>
-            <div class="card"><div class="card-header"><div class="card-title">📊 Dashboard</div><button id="exportCsvBtn" class="btn-secondary">Export CSV</button></div><canvas id="revenueChart" height="120"></canvas><div id="kpiMini"></div></div>
+            <div class="card"><div class="card-header"><div class="card-title">📑 AMC Contracts</div>${isAdmin ? '<button id="newAmcBtn" class="btn-secondary">+ Add</button>' : ''}</div><div id="amcList"></div></div>
+            <div class="card"><div class="card-header"><div class="card-title">📊 Dashboard</div>${isAdmin ? '<button id="exportCsvBtn" class="btn-secondary">Export CSV</button>' : ''}</div><canvas id="revenueChart" height="120"></canvas><div id="kpiMini"></div></div>
           </div>
-          <div class="card"><div class="card-header"><div class="card-title">📄 Recent Invoices</div><button id="createInvoiceBtn" class="btn-secondary">+ Invoice</button></div> <table id="invoiceTable"><thead><tr><th>Client</th><th>Description</th><th>Amount</th><th>Date</th><th>PDF</th></tr></thead><tbody id="invoiceBody"></tbody></table></div>
+          <div class="card"><div class="card-header"><div class="card-title">📄 Recent Invoices</div>${isAdmin ? '<button id="createInvoiceBtn" class="btn-secondary">+ Invoice</button>' : ''}</div> <table id="invoiceTable"><thead><tr><th>Client</th><th>Description</th><th>Amount</th><th>Date</th><th>PDF</th></tr></thead><tbody id="invoiceBody"></tbody></table></div>
         </div>
       `;
 
@@ -262,7 +260,6 @@
         <div class="stat-card"><div class="stat-label">Revenue (AED)</div><div class="stat-value">${totalRevenue.toLocaleString()}</div></div>
       `;
 
-      // Jobs table
       const jobsBody = document.getElementById('jobsBody');
       jobsBody.innerHTML = '';
       jobs.forEach(job => {
@@ -273,12 +270,15 @@
         row.insertCell(3).innerHTML = `<span style="color:${job.priority==='High'?'var(--accent)':'var(--amber)'}">● ${job.priority}</span>`;
         row.insertCell(4).innerHTML = `<span class="badge ${job.status==='Completed'?'badge-completed':'badge-progress'}">${job.status}</span>`;
         const actionCell = row.insertCell(5);
-        actionCell.innerHTML = `<select class="status-update" data-id="${job.id}"><option ${job.status==='In Progress'?'selected':''}>In Progress</option><option ${job.status==='Assigned'?'selected':''}>Assigned</option><option ${job.status==='Completed'?'selected':''}>Completed</option></select> <button class="delete-job" data-id="${job.id}">🗑️</button>`;
-        actionCell.querySelector('.status-update').onchange = async (e) => { await apiFetch(`/jobs/${job.id}`, { method: 'PUT', body: JSON.stringify({ status: e.target.value }) }); renderDashboard(); };
-        actionCell.querySelector('.delete-job').onclick = async () => { await apiFetch(`/jobs/${job.id}`, { method: 'DELETE' }); renderDashboard(); };
+        if (isAdmin) {
+          actionCell.innerHTML = `<select class="status-update" data-id="${job.id}"><option ${job.status==='In Progress'?'selected':''}>In Progress</option><option ${job.status==='Assigned'?'selected':''}>Assigned</option><option ${job.status==='Completed'?'selected':''}>Completed</option></select> <button class="delete-job" data-id="${job.id}">🗑️</button>`;
+          actionCell.querySelector('.status-update').onchange = async (e) => { await apiFetch(`/jobs/${job.id}`, { method: 'PUT', body: JSON.stringify({ status: e.target.value }) }); renderDashboard(); };
+          actionCell.querySelector('.delete-job').onclick = async () => { await apiFetch(`/jobs/${job.id}`, { method: 'DELETE' }); renderDashboard(); };
+        } else {
+          actionCell.innerHTML = `<span class="badge ${job.status==='Completed'?'badge-completed':'badge-progress'}">${job.status}</span>`;
+        }
       });
 
-      // Technicians dispatch
       const dispatchDiv = document.getElementById('dispatchList');
       dispatchDiv.innerHTML = '';
       techs.forEach(tech => {
@@ -286,11 +286,9 @@
         dispatchDiv.innerHTML += `<div class="dispatch-card"><div><strong>${tech.name}</strong><div style="font-size:0.7rem;">${tech.role}</div></div><div>${assigned} jobs</div></div>`;
       });
 
-      // AMCs
       const amcDiv = document.getElementById('amcList');
       amcDiv.innerHTML = amcs.map(a => `<div class="amc-item"><div><strong>${a.client_name}</strong><div style="font-size:0.7rem;">Exp: ${a.expiry}</div></div><div>${a.visits_per_year}/year <span class="badge">${a.status}</span></div></div>`).join('');
 
-      // Invoices
       const invBody = document.getElementById('invoiceBody');
       invBody.innerHTML = '';
       invoices.forEach(inv => {
@@ -303,18 +301,18 @@
         row.cells[4].querySelector('button').onclick = () => generatePDFInvoice(inv.client_name, inv.description, inv.amount);
       });
 
-      // Chart
       const ctx = document.getElementById('revenueChart').getContext('2d');
       if (jobsChart) jobsChart.destroy();
       const last6 = invoices.slice(-6);
       jobsChart = new Chart(ctx, { type: 'bar', data: { labels: last6.map(i => i.date), datasets: [{ label: 'Amount (AED)', data: last6.map(i => i.amount), backgroundColor: '#d4500a' }] } });
       document.getElementById('kpiMini').innerHTML = `<div>Total Invoices: ${invoices.length}</div><div>Collected: AED ${totalRevenue.toLocaleString()}</div>`;
 
-      // Event listeners
-      document.getElementById('newJobBtn').onclick = () => showJobModal(clients, techs, services);
-      document.getElementById('newAmcBtn').onclick = () => showAmcModal(clients);
-      document.getElementById('createInvoiceBtn').onclick = () => showInvoiceModal(clients);
-      document.getElementById('exportCsvBtn').onclick = () => exportCSV(jobs, amcs, invoices);
+      if (isAdmin) {
+        document.getElementById('newJobBtn').onclick = () => showJobModal(clients, techs, services);
+        document.getElementById('newAmcBtn').onclick = () => showAmcModal(clients);
+        document.getElementById('createInvoiceBtn').onclick = () => showInvoiceModal(clients);
+        document.getElementById('exportCsvBtn').onclick = () => exportCSV(jobs, amcs, invoices);
+      }
       document.getElementById('logoutBtn').onclick = () => logout();
     } catch (err) {
       console.error(err);
@@ -322,7 +320,6 @@
     }
   }
 
-  // Modals (same as before, using apiFetch)
   async function showJobModal(clients, techs, services) {
     const modal = document.createElement('div'); modal.className = 'modal'; modal.style.display = 'flex';
     modal.innerHTML = `
@@ -392,7 +389,6 @@
     };
   }
 
-  // Startup: check for existing session
   const savedToken = localStorage.getItem('token');
   const savedUser = localStorage.getItem('user');
   if (savedToken && savedUser) {
