@@ -30,7 +30,6 @@
     body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; }
     .container { max-width: 1400px; margin: 0 auto; }
     
-    /* Login/Signup styles */
     .auth-container { max-width: 480px; margin: 10vh auto; background: var(--surface); border-radius: var(--radius); padding: 40px; border: 1px solid var(--border); box-shadow: var(--shadow); }
     .auth-container h2 { font-family: 'Syne', sans-serif; margin-bottom: 8px; }
     .auth-container .sub { color: var(--text-muted); margin-bottom: 28px; font-size: 0.85rem; }
@@ -46,7 +45,6 @@
     .demo-btn:hover { background: var(--surface-2); }
     .error-msg { color: #dc2626; font-size: 0.8rem; margin-top: 8px; text-align: center; }
     
-    /* Dashboard header */
     .dashboard-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; background: var(--surface); border-radius: var(--radius); padding: 20px 28px; margin-bottom: 24px; border: 1px solid var(--border); }
     .logo-area h1 { font-family: 'Syne', sans-serif; font-size: 1.6rem; }
     .logo-area span { color: var(--accent); }
@@ -83,16 +81,33 @@
   let authToken = null;
   let jobsChart = null;
 
+  function getCurrencySymbol(currency = 'AED') {
+    return currency === 'EUR' ? '€' : 'AED';
+  }
+
   async function apiFetch(endpoint, options = {}) {
     const headers = { 'Content-Type': 'application/json', ...options.headers };
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
-    const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-    if (res.status === 401) {
-      logout();
-      throw new Error('Session expired. Please login again.');
+    try {
+      const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+      
+      if (res.status === 401) {
+        logout();
+        throw new Error('Session expired. Please login again.');
+      }
+      
+      if (res.status === 403) {
+        const error = await res.json();
+        alert(error.error || 'Insufficient permissions. Admin access required.');
+        throw new Error(error.error);
+      }
+      
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    } catch (err) {
+      console.error('API Error:', err);
+      throw err;
     }
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
   }
 
   function logout() {
@@ -118,11 +133,11 @@
     renderDashboard();
   }
 
-  async function signup(email, password, company_name) {
+  async function signup(email, password, company_name, currency = 'AED') {
     const res = await fetch(`${API_BASE}/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, company_name })
+      body: JSON.stringify({ email, password, company_name, currency })
     });
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
@@ -183,6 +198,12 @@
             <div class="input-group"><label>Email</label><input type="email" id="signupEmail" placeholder="you@company.com"></div>
             <div class="input-group"><label>Password</label><input type="password" id="signupPassword"></div>
             <div class="input-group"><label>Confirm Password</label><input type="password" id="signupConfirm"></div>
+            <div class="input-group"><label>Currency</label>
+              <select id="signupCurrency">
+                <option value="AED">AED (UAE Dirham)</option>
+                <option value="EUR">EUR (Euro)</option>
+              </select>
+            </div>
             <button class="btn-primary" id="signupBtn">Create Account</button>
             <div class="auth-toggle">Already have an account? <span id="toggleLogin">Sign In</span></div>
             <div id="errorMsg" class="error-msg"></div>
@@ -193,7 +214,12 @@
           const confirm = document.getElementById('signupConfirm').value;
           if (pwd !== confirm) { document.getElementById('errorMsg').innerText = 'Passwords do not match'; return; }
           try {
-            await signup(document.getElementById('signupEmail').value, pwd, document.getElementById('signupCompany').value);
+            await signup(
+              document.getElementById('signupEmail').value, 
+              pwd, 
+              document.getElementById('signupCompany').value,
+              document.getElementById('signupCurrency').value
+            );
           } catch(e) { document.getElementById('errorMsg').innerText = e.message; }
         };
         document.getElementById('toggleLogin').onclick = () => { mode = 'login'; updateForm(); };
@@ -208,9 +234,10 @@
     doc.text('MaintenanceFlow PRO', 14, 20);
     doc.text(`Invoice #: INV-${Date.now()}`, 14, 30);
     doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 36);
-    doc.autoTable({ startY: 45, head: [['Description', 'Amount (AED)']], body: [[desc, amount]], theme: 'striped' });
+    const currencySymbol = getCurrencySymbol(currentUser?.currency);
+    doc.autoTable({ startY: 45, head: [['Description', `Amount (${currencySymbol})`]], body: [[desc, amount]], theme: 'striped' });
     doc.text(`Customer: ${client}`, 14, doc.lastAutoTable.finalY + 10);
-    doc.text(`Total: AED ${amount}`, 14, doc.lastAutoTable.finalY + 18);
+    doc.text(`Total: ${currencySymbol} ${amount}`, 14, doc.lastAutoTable.finalY + 18);
     doc.save(`Invoice_${client.replace(/\s/g, '_')}.pdf`);
   }
 
@@ -229,6 +256,7 @@
       const totalRevenue = invoices.reduce((s,i) => s + i.amount, 0);
       const activeTechs = techs.filter(t => t.active).length;
       const isAdmin = currentUser.role === 'admin';
+      const currencySymbol = getCurrencySymbol(currentUser?.currency);
 
       const app = document.getElementById('app');
       app.innerHTML = `
@@ -242,7 +270,7 @@
           </div>
           <div class="stats-grid" id="statsGrid"></div>
           <div class="main-grid">
-            <div class="card"><div class="card-header"><div class="card-title">📋 Service Jobs</div>${isAdmin ? '<button id="newJobBtn" class="btn-secondary">+ New Job</button>' : ''}</div> <table id="jobsTable"><thead><tr><th>Customer</th><th>Service</th><th>Technician</th><th>Priority</th><th>Status</th><th>Actions</th></tr></thead><tbody id="jobsBody"></tbody></table></div>
+            <div class="card"><div class="card-header"><div class="card-title">📋 Service Jobs</div>${isAdmin ? '<button id="newJobBtn" class="btn-secondary">+ New Job</button>' : '<div style="font-size:0.75rem; color:var(--text-muted)">Read‑only mode</div>'}</div> <table id="jobsTable"><thead><tr><th>Customer</th><th>Service</th><th>Technician</th><th>Priority</th><th>Status</th><th>Actions</th></tr></thead><tbody id="jobsBody"></tbody></table></div>
             <div class="card"><div class="card-header"><div class="card-title">👨‍🔧 Technicians</div></div><div id="dispatchList"></div></div>
           </div>
           <div class="bottom-grid">
@@ -257,7 +285,7 @@
         <div class="stat-card"><div class="stat-label">Open Jobs</div><div class="stat-value">${openJobs}</div></div>
         <div class="stat-card"><div class="stat-label">AMC Contracts</div><div class="stat-value">${amcs.length}</div></div>
         <div class="stat-card"><div class="stat-label">Active Techs</div><div class="stat-value">${activeTechs}</div></div>
-        <div class="stat-card"><div class="stat-label">Revenue (AED)</div><div class="stat-value">${totalRevenue.toLocaleString()}</div></div>
+        <div class="stat-card"><div class="stat-label">Revenue (${currencySymbol})</div><div class="stat-value">${currencySymbol} ${totalRevenue.toLocaleString()}</div></div>
       `;
 
       const jobsBody = document.getElementById('jobsBody');
@@ -295,7 +323,7 @@
         const row = invBody.insertRow();
         row.insertCell(0).innerHTML = inv.client_name;
         row.insertCell(1).innerHTML = inv.description;
-        row.insertCell(2).innerHTML = `AED ${inv.amount}`;
+        row.insertCell(2).innerHTML = `${currencySymbol} ${inv.amount}`;
         row.insertCell(3).innerHTML = inv.date;
         row.insertCell(4).innerHTML = `<button class="btn-secondary" data-inv='${JSON.stringify(inv)}'>PDF</button>`;
         row.cells[4].querySelector('button').onclick = () => generatePDFInvoice(inv.client_name, inv.description, inv.amount);
@@ -304,8 +332,8 @@
       const ctx = document.getElementById('revenueChart').getContext('2d');
       if (jobsChart) jobsChart.destroy();
       const last6 = invoices.slice(-6);
-      jobsChart = new Chart(ctx, { type: 'bar', data: { labels: last6.map(i => i.date), datasets: [{ label: 'Amount (AED)', data: last6.map(i => i.amount), backgroundColor: '#d4500a' }] } });
-      document.getElementById('kpiMini').innerHTML = `<div>Total Invoices: ${invoices.length}</div><div>Collected: AED ${totalRevenue.toLocaleString()}</div>`;
+      jobsChart = new Chart(ctx, { type: 'bar', data: { labels: last6.map(i => i.date), datasets: [{ label: `Amount (${currencySymbol})`, data: last6.map(i => i.amount), backgroundColor: '#d4500a' }] } });
+      document.getElementById('kpiMini').innerHTML = `<div>Total Invoices: ${invoices.length}</div><div>Collected: ${currencySymbol} ${totalRevenue.toLocaleString()}</div>`;
 
       if (isAdmin) {
         document.getElementById('newJobBtn').onclick = () => showJobModal(clients, techs, services);

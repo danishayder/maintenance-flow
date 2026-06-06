@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const authMiddleware = require('./middleware/auth');
+
 const jobsRoutes = require('./routes/jobs');
 const amcsRoutes = require('./routes/amcs');
 const invoicesRoutes = require('./routes/invoices');
@@ -16,10 +17,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('frontend'));
 
-// Public routes
+// Public routes (no authentication required)
 app.use('/api/auth', authRoutes);
 
-// Protected routes (require login)
+// Protected routes (authentication required for all methods)
 app.use('/api/jobs', authMiddleware, jobsRoutes);
 app.use('/api/amcs', authMiddleware, amcsRoutes);
 app.use('/api/invoices', authMiddleware, invoicesRoutes);

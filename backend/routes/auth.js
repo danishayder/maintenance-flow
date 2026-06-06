@@ -4,9 +4,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const supabase = require('../db/supabase');
 
-// Signup
+// Signup (with currency preference)
 router.post('/signup', async (req, res) => {
-  const { email, password, company_name } = req.body;
+  const { email, password, company_name, currency = 'AED' } = req.body;
   if (!email || !password || !company_name) {
     return res.status(400).json({ error: 'Missing fields' });
   }
@@ -14,17 +14,17 @@ router.post('/signup', async (req, res) => {
   const password_hash = await bcrypt.hash(password, 10);
   const { data, error } = await supabase
     .from('users')
-    .insert([{ email, password_hash, company_name, role: 'admin' }])
+    .insert([{ email, password_hash, company_name, role: 'admin', currency }])
     .select();
 
   if (error) return res.status(400).json({ error: error.message });
   const user = data[0];
   const token = jwt.sign(
-    { id: user.id, email: user.email, company_name: user.company_name, role: user.role },
+    { id: user.id, email: user.email, company_name: user.company_name, role: user.role, currency: user.currency },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
-  res.json({ token, user: { email: user.email, company_name: user.company_name, role: user.role } });
+  res.json({ token, user: { email: user.email, company_name: user.company_name, role: user.role, currency: user.currency } });
 });
 
 // Login
@@ -48,14 +48,14 @@ router.post('/login', async (req, res) => {
   if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
 
   const token = jwt.sign(
-    { id: data.id, email: data.email, company_name: data.company_name, role: data.role },
+    { id: data.id, email: data.email, company_name: data.company_name, role: data.role, currency: data.currency || 'AED' },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
-  res.json({ token, user: { email: data.email, company_name: data.company_name, role: data.role } });
+  res.json({ token, user: { email: data.email, company_name: data.company_name, role: data.role, currency: data.currency || 'AED' } });
 });
 
-// Demo login
+// Demo login (Estonia-based, EUR currency)
 router.post('/demo', async (req, res) => {
   let { data, error } = await supabase.from('users').select('*').eq('email', 'demo@maintain.com').single();
   if (error || !data) {
@@ -63,18 +63,18 @@ router.post('/demo', async (req, res) => {
     const password_hash = await bcrypt.hash(demoPassword, 10);
     const { data: newDemo, error: insertError } = await supabase
       .from('users')
-      .insert([{ email: 'demo@maintain.com', password_hash, company_name: 'Demo Company', role: 'demo' }])
+      .insert([{ email: 'demo@maintain.com', password_hash, company_name: 'Demo Estonia', role: 'demo', currency: 'EUR' }])
       .select();
     if (insertError) return res.status(500).json({ error: insertError.message });
     data = newDemo[0];
   }
 
   const token = jwt.sign(
-    { id: data.id, email: data.email, company_name: data.company_name, role: data.role },
+    { id: data.id, email: data.email, company_name: data.company_name, role: data.role, currency: data.currency || 'EUR' },
     process.env.JWT_SECRET,
     { expiresIn: '1d' }
   );
-  res.json({ token, user: { email: data.email, company_name: data.company_name, role: data.role } });
+  res.json({ token, user: { email: data.email, company_name: data.company_name, role: data.role, currency: data.currency || 'EUR' } });
 });
 
 module.exports = router;
