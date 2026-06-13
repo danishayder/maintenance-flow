@@ -1,0 +1,86 @@
+const express = require('express');
+const router = express.Router();
+const supabase = require('../db/supabase');
+
+// Get all assets
+router.get('/', async (req, res) => {
+  try {
+    let query = supabase.from('assets').select('*, clients(name), sites(id, name)');
+    if (req.query.client_id) {
+      query = query.eq('client_id', req.query.client_id);
+    }
+    const { data, error } = await query.order('name');
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get single asset with linked jobs
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data: asset, error: assetErr } = await supabase
+      .from('assets')
+      .select('*, clients(name), sites(id, name)')
+      .eq('id', id)
+      .single();
+    if (assetErr) throw assetErr;
+    const { data: jobs, error: jobsErr } = await supabase
+      .from('jobs')
+      .select('*')
+      .eq('asset_id', id)
+      .order('created_at', { ascending: false });
+    if (jobsErr) throw jobsErr;
+    res.json({ ...asset, jobs });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Create asset
+router.post('/', async (req, res) => {
+  try {
+    const { client_id, site_id, asset_code, name, type, manufacturer, model, installation_date, status, notes } = req.body;
+    const { data, error } = await supabase
+      .from('assets')
+      .insert([{ client_id, site_id, asset_code, name, type, manufacturer, model, installation_date, status, notes }])
+      .select();
+    if (error) throw error;
+    res.status(201).json(data[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update asset
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    const { data, error } = await supabase
+      .from('assets')
+      .update(updates)
+      .eq('id', id)
+      .select();
+    if (error) throw error;
+    res.json(data[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete asset
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error } = await supabase.from('assets').delete().eq('id', id);
+    if (error) throw error;
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+module.exports = router;

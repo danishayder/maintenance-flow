@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>MaintenanceFlow PRO</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f0ede8; }
+    
+    /* Login */
+    .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .login-container h2 { margin-bottom: 10px; text-align: center; }
+    .login-container p { color: #666; margin-bottom: 30px; text-align: center; }
+    .login-container input, .login-container select { width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; }
+    .login-container button { width: 100%; padding: 12px; background: #d4500a; color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; margin-bottom: 12px; }
+    .login-container button:hover { background: #b84308; }
+    .demo-btn { background: #1a1a1a !important; }
+    .demo-btn:hover { background: #333 !important; }
+    .error-msg { color: #dc2626; text-align: center; margin-top: 12px; font-size: 14px; }
+    .divider { text-align: center; margin: 20px 0; color: #999; position: relative; }
+    .divider::before, .divider::after { content: ""; position: absolute; top: 50%; width: 45%; height: 1px; background: #ddd; }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+    
+    /* Dashboard Layout - Left Align Menu */
+    .app-container { display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; background: #1a1a1a; color: white; position: fixed; height: 100vh; overflow-y: auto; left: 0; top: 0; z-index: 100; }
+    .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid #333; margin-bottom: 20px; }
+    .sidebar-logo h2 { color: white; font-size: 1.3rem; }
+    .sidebar-logo span { color: #d4500a; }
+    .sidebar-logo p { font-size: 0.7rem; color: #888; margin-top: 5px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; color: #aaa; transition: all 0.2s; }
+    .nav-item:hover { background: #333; color: white; }
+    .nav-item.active { background: #d4500a; color: white; }
+    .nav-item span:first-child { font-size: 1.2rem; }
+    
+    .main-content { flex: 1; margin-left: 260px; padding: 20px; }
+    .header { background: white; padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .user-info { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .logout-btn { background: #e0e0e0; color: #333; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+    .logout-btn:hover { background: #ccc; }
+    
+    /* Stats Cards */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: white; padding: 20px; border-radius: 12px; }
+    .stat-value { font-size: 28px; font-weight: bold; margin-top: 8px; }
+    
+    /* Cards */
+    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+    .card-header h3 { font-size: 1.1rem; }
+    
+    /* Tables */
+    .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; min-width: 500px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+    th { font-weight: 600; color: #666; font-size: 0.8rem; }
+    
+    /* Buttons */
+    .btn-primary { background: #1a1a1a; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+    .btn-primary:hover { background: #d4500a; }
+    .btn-secondary { background: #e0e0e0; color: #333; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+    .btn-danger { background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .btn-sm { background: #1a1a1a; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .btn-sm:hover { background: #d4500a; }
+    
+    /* Modal */
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-content { background: white; width: 90%; max-width: 500px; border-radius: 20px; padding: 24px; max-height: 90vh; overflow-y: auto; }
+    .modal-content h3 { margin-bottom: 20px; }
+    .modal-content label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 13px; color: #666; }
+    .modal-content input, .modal-content select, .modal-content textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+    
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+    .badge-active { background: #d1fae5; color: #059669; }
+    .badge-pending { background: #fef3c7; color: #d97706; }
+    .empty { text-align: center; padding: 40px; color: #999; }
+    .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+    
+    /* Mobile Menu Button */
+    .mobile-menu-btn { display: none; position: fixed; top: 15px; left: 15px; z-index: 201; background: #1a1a1a; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 20px; }
+    .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; width: 280px; }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: 60px 15px 15px 15px; }
+      .mobile-menu-btn { display: block; }
+      .sidebar-overlay.open { display: block; }
+      .stats { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .card-header { flex-direction: column; align-items: flex-start; }
+      .header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">Loading...</div>
+
+<script>
+  const API = '/api';
+  let token = null;
+  let user = null;
+  let currentPage = 'dashboard';
+  let sidebarOpen = false;
+
+  function toggleSidebar() { sidebarOpen = !sidebarOpen; updateSidebar(); }
+  function closeSidebar() { sidebarOpen = false; updateSidebar(); }
+  function updateSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (sidebar) sidebar.classList.toggle('open', sidebarOpen);
+    if (overlay) overlay.classList.toggle('open', sidebarOpen);
+  }
+
+  async function fetchAPI(endpoint, options = {}) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(API + endpoint, { ...options, headers });
+    if (res.status === 401) { logout(); throw new Error('Session expired'); }
+    if (!res.ok) throw new Error((await res.json()).error || 'Request failed');
+    return res.json();
+  }
+
+  async function login(email, password) {
+    try {
+      const res = await fetch(API + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+      if (!res.ok) throw new Error('Invalid email or password');
+      const data = await res.json();
+      token = data.token; user = data.user;
+      localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user));
+      renderApp();
+    } catch (err) { document.getElementById('errorMsg').innerText = err.message; }
+  }
+
+  async function signup(email, password, company_name, currency) {
+    try {
+      const res = await fetch(API + '/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, company_name, currency }) });
+      if (!res.ok) throw new Error((await res.json()).error || 'Signup failed');
+      const data = await res.json();
+      token = data.token; user = data.user;
+      localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user));
+      renderApp();
+    } catch (err) { document.getElementById('errorMsg').innerText = err.message; }
+  }
+
+  async function demoLogin() {
+    try {
+      const res = await fetch(API + '/auth/demo', { method: 'POST' });
+      const data = await res.json();
+      token = data.token; user = data.user;
+      localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user));
+      renderApp();
+    } catch (err) { alert('Demo login failed: ' + err.message); }
+  }
+
+  function logout() { token = null; user = null; localStorage.clear(); renderApp(); }
+
+  let showSignup = false;
+  function toggleForm() { showSignup = !showSignup; renderApp(); }
+
+  async function renderApp() {
+    const savedToken = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    
+    if (savedToken && savedUser && !token) {
+      token = savedToken;
+      user = JSON.parse(savedUser);
+      try { await fetchAPI('/clients'); } catch { logout(); return; }
+    }
+
+    if (!token || !user) {
+      document.getElementById('app').innerHTML = `
+        <div class="login-container">
+          <h2>🔧 MaintenanceFlow PRO</h2>
+          <p>HVAC · MEP · Electrical · Plumbing · Civil</p>
+          ${!showSignup ? `
+            <input type="email" id="loginEmail" placeholder="Email" value="demo@maintain.com">
+            <input type="password" id="loginPassword" placeholder="Password" value="demo123">
+            <button onclick="login(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)">Sign In</button>
+            <div class="divider">or</div>
+            <button class="demo-btn" onclick="demoLogin()">🚀 Try Demo</button>
+            <p style="text-align: center; margin-top: 20px;">New user? <a href="#" onclick="toggleForm(); return false;">Create account</a></p>
+          ` : `
+            <input type="text" id="signupCompany" placeholder="Company Name">
+            <input type="email" id="signupEmail" placeholder="Email">
+            <input type="password" id="signupPassword" placeholder="Password">
+            <select id="signupCurrency"><option value="AED">AED (UAE Dirham)</option><option value="EUR">EUR (Euro)</option></select>
+            <button onclick="signup(document.getElementById('signupEmail').value, document.getElementById('signupPassword').value, document.getElementById('signupCompany').value, document.getElementById('signupCurrency').value)">Create Account</button>
+            <div class="divider">or</div>
+            <button class="demo-btn" onclick="demoLogin()">🚀 Try Demo</button>
+            <p style="text-align: center; margin-top: 20px;">Already have an account? <a href="#" onclick="toggleForm(); return false;">Sign In</a></p>
+          `}
+          <div id="errorMsg" class="error-msg"></div>
+        </div>
+      `;
+      return;
+    }
+    await showDashboard();
+  }
+
+  async function showDashboard() {
+    let jobs = [], clients = [], techs = [], invoices = [], amcs = [], sites = [], services = [], assets = [];
+    try {
+      [jobs, clients, techs, invoices, amcs, sites, services, assets] = await Promise.all([
+        fetchAPI('/jobs'), fetchAPI('/clients'), fetchAPI('/technicians'),
+        fetchAPI('/invoices'), fetchAPI('/amcs'), fetchAPI('/sites'),
+        fetchAPI('/services'), fetchAPI('/assets')
+      ]);
+    } catch(e) { console.error(e); }
+
+    const openJobs = jobs.filter(j => j.status !== 'Completed').length;
+    const totalRevenue = invoices.reduce((s,i) => s + (i.amount || 0), 0);
+    const activeTechs = techs.filter(t => t.active).length;
+    const sym = user?.currency === 'EUR' ? '€' : 'AED';
+
+    const navItems = [
+      { page: 'dashboard', icon: '📊', label: 'Dashboard' },
+      { page: 'amc', icon: '📑', label: 'AMC Contracts' },
+      { page: 'tasks', icon: '⚡', label: 'Assigned Tasks' },
+      { page: 'invoices', icon: '🧾', label: 'Invoices' },
+      { page: 'assets', icon: '📦', label: 'Assets' },
+      { page: 'quotations', icon: '📝', label: 'Quotations' },
+      { page: 'customers', icon: '👥', label: 'Customers' },
+      { page: 'sites', icon: '📍', label: 'Sites' },
+      { page: 'technicians', icon: '🔧', label: 'Technicians' },
+      { page: 'services', icon: '📋', label: 'Services' }
+    ];
+
+    document.getElementById('app').innerHTML = `
+      <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+      <div class="app-container">
+        <div class="sidebar">
+          <div class="sidebar-logo">
+            <h2>Maint<span>Flow</span></h2>
+            <p>HVAC · MEP · Civil</p>
+          </div>
+          ${navItems.map(item => `
+            <div class="nav-item ${currentPage === item.page ? 'active' : ''}" data-page="${item.page}">
+              <span>${item.icon}</span>
+              <span>${item.label}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="main-content">
+          <div class="header">
+            <h2>🔧 MaintenanceFlow PRO</h2>
+            <div class="user-info">
+              <span>👤 ${user?.email || user?.company_name || 'Demo'} (${user?.currency || 'AED'})</span>
+              <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+          </div>
+          <div id="page-container"></div>
+        </div>
+      </div>
+    `;
+
+    document.querySelectorAll('.nav-item[data-page]').forEach(el => {
+      el.addEventListener('click', () => {
+        currentPage = el.dataset.page;
+        sidebarOpen = false; updateSidebar();
+        renderApp();
+      });
+    });
+
+    const container = document.getElementById('page-container');
+    
+    // Dashboard Page
+    if (currentPage === 'dashboard') {
+      container.innerHTML = `
+        <div class="stats">
+          <div class="stat-card"><div>📋 Open Jobs</div><div class="stat-value">${openJobs}</div></div>
+          <div class="stat-card"><div>📑 AMC Contracts</div><div class="stat-value">${amcs.length}</div></div>
+          <div class="stat-card"><div>🔧 Active Techs</div><div class="stat-value">${activeTechs}</div></div>
+          <div class="stat-card"><div>💰 Revenue</div><div class="stat-value">${sym} ${totalRevenue.toLocaleString()}</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>📋 Recent Jobs</h3><button class="btn-primary" onclick="showAddJobModal()">+ New Job</button></div>
+          <div class="table-responsive"><table><thead><tr><th>Customer</th><th>Service</th><th>Technician</th><th>Status</th></tr></thead><tbody>
+            ${jobs.slice(0,5).map(j => `<tr><td>${j.customer_name || '-'}</td><td>${j.service || '-'}</td><td>${j.technician || '-'}</td><td><span class="badge badge-pending">${j.status || 'pending'}</span></td></tr>`).join('')}
+            ${jobs.length === 0 ? '<tr><td colspan="4" class="empty">No jobs yet</td></tr>' : ''}
+          </tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>👥 Customers</h3><button class="btn-primary" onclick="showAddCustomerModal()">+ Add Customer</button></div>
+          <div class="table-responsive"><table><thead><tr><th>Name</th><th>Contact</th><th>Address</th></tr></thead><tbody>
+            ${clients.slice(0,5).map(c => `<tr><td><strong>${c.name}</strong></td><td>${c.contact || '-'}</td><td>${c.address || '-'}</td></tr>`).join('')}
+            ${clients.length === 0 ? '<tr><td colspan="3" class="empty">No customers yet</td></tr>' : ''}
+          </tbody></table></div>
+        </div>
+      `;
+    }
+    
+    // Customers Page
+    else if (currentPage === 'customers') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><h3>👥 All Customers</h3><button class="btn-primary" onclick="showAddCustomerModal()">+ Add Customer</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Name</th><th>Contact</th><th>Email</th><th>Address</th><th>Currency</th><th>Sites</th><th>Actions</th></tr></thead><tbody>
+          ${clients.map(c => `<tr><td><strong>${c.name}</strong></td><td>${c.contact || '-'}</td><td>${c.email || '-'}</td><td>${c.address || '-'}</td><td>${c.currency || 'AED'}</td><td><button class="btn-sm" onclick="viewCustomerSites('${c.id}')">${sites.filter(s=>s.customer_id===c.id).length} sites</button></td><td class="action-buttons"><button class="btn-sm" onclick="deleteCustomer('${c.id}')">Delete</button></td></tr>`).join('')}
+          ${clients.length === 0 ? '<tr><td colspan="7" class="empty">No customers yet</td></tr>' : ''}
+        </tbody></table></div>
+      `;
+    }
+    
+    // Sites Page
+    else if (currentPage === 'sites') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><h3>📍 All Sites</h3><button class="btn-primary" onclick="showAddSiteModal()">+ Add Site</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Site Name</th><th>Customer</th><th>Address</th><th>Contact Person</th><th>Phone</th><th>Actions</th></tr></thead><tbody>
+          ${sites.map(s => { const c = clients.find(c => c.id === s.customer_id); return `<tr><td><strong>${s.name}</strong></td><td>${c ? c.name : '-'}</td><td>${s.address || '-'}</td><td>${s.contact_person || '-'}</td><td>${s.phone || '-'}</td><td class="action-buttons"><button class="btn-sm" onclick="deleteSite('${s.id}')">Delete</button></td></tr>`; }).join('')}
+          ${sites.length === 0 ? '<tr><td colspan="6" class="empty">No sites yet</td></tr>' : ''}
+        </tbody></table></div>
+      `;
+    }
+    
+    // Invoices Page
+    else if (currentPage === 'invoices') {
+      container.innerHTML = `
+        <div class="stats"><div class="stat-card"><div>Total Invoices</div><div class="stat-value">${invoices.length}</div></div>
+        <div class="stat-card"><div>Total Amount</div><div class="stat-value">${sym} ${totalRevenue.toLocaleString()}</div></div></div>
+        <div class="card"><div class="card-header"><h3>🧾 All Invoices</h3><button class="btn-primary" onclick="showAddInvoiceModal()">+ Create Invoice</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Invoice #</th><th>Client</th><th>Description</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead><tbody>
+          ${invoices.map(i => `<tr><td>${i.invoice_number || 'INV-' + i.id}</td><td>${i.client_name || '-'}</td><td>${i.description || '-'}</td><td>${sym} ${i.amount || 0}</td><td>${i.date || '-'}</td><td><span class="badge badge-active">${i.status || 'Pending'}</span></td></tr>`).join('')}
+          ${invoices.length === 0 ? '<tr><td colspan="6" class="empty">No invoices yet</td></tr>' : ''}
+        </tbody></table></div>
+      `;
+    }
+    
+    // Technicians Page
+    else if (currentPage === 'technicians') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><h3>🔧 All Technicians</h3><button class="btn-primary" onclick="showAddTechnicianModal()">+ Add Technician</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+          ${techs.map(t => `<tr><td><strong>${t.name}</strong></td><td>${t.role || '-'}</td><td>${t.email || '-'}</td><td>${t.phone || '-'}</td><td><span class="badge badge-active">${t.active ? 'Active' : 'Inactive'}</span></td><td><button class="btn-sm" onclick="deleteTechnician('${t.id}')">Delete</button></td></tr>`).join('')}
+          ${techs.length === 0 ? '<tr><td colspan="6" class="empty">No technicians yet</td></tr>' : ''}
+        </tbody></table></div>
+      `;
+    }
+    
+    // AMC Page
+    else if (currentPage === 'amc') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><h3>📑 AMC Contracts</h3><button class="btn-primary" onclick="showAddAmcModal()">+ Add Contract</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Client</th><th>Visits/Year</th><th>Expiry</th><th>Status</th></tr></thead><tbody>
+          ${amcs.map(a => `<tr><td>${a.client_name}</td><td>${a.visits_per_year || 4}</td><td>${a.expiry || '-'}</td><td><span class="badge badge-active">${a.status || 'Active'}</span></td></tr>`).join('')}
+          ${amcs.length === 0 ? '<tr><td colspan="4" class="empty">No AMC contracts yet</td></tr>' : ''}
+        </tbody></table></div>
+      `;
+    }
+    
+    // Tasks Page
+    else if (currentPage === 'tasks') {
+      container.innerHTML = `
+        <div class="stats"><div class="stat-card"><div>Total Tasks</div><div class="stat-value">${jobs.length}</div></div>
+        <div class="stat-card"><div>In Progress</div><div class="stat-value">${jobs.filter(j => j.status === 'In Progress').length}</div></div>
+        <div class="stat-card"><div>Completed</div><div class="stat-value">${jobs.filter(j => j.status === 'Completed').length}</div></div></div>
+        <div class="card"><div class="card-header"><h3>⚡ All Tasks</h3><button class="btn-primary" onclick="showAddJobModal()">+ New Task</button></div>
+        <div class="table-responsive"><tr><thead><tr><th>Customer</th><th>Service</th><th>Technician</th><th>Priority</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+          ${jobs.map(j => `<tr><td>${j.customer_name || '-'}</td><td>${j.service || '-'}</td><td>${j.technician || '-'}</td><td><span class="badge ${j.priority === 'High' ? 'badge-pending' : 'badge-active'}">${j.priority || 'Medium'}</span></td><td><span class="badge badge-pending">${j.status || 'pending'}</span></td><td><button class="btn-sm" onclick="updateJobStatus('${j.id}')">Update</button></td></tr>`).join('')}
+          ${jobs.length === 0 ? '<tr><td colspan="6" class="empty">No tasks yet</td></tr>' : ''}
+        </tbody></table></div>
+      `;
+    }
+    
+    // Services Page
+    else if (currentPage === 'services') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><h3>📋 Service Catalog</h3><button class="btn-primary" onclick="showAddServiceModal()">+ Add Service</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Service Name</th><th>Actions</th></tr></thead><tbody>
+          ${services.map(s => `<tr><td>${s.name}</td><td><button class="btn-sm btn-danger" onclick="deleteService('${s.id}')">Delete</button></td></tr>`).join('')}
+          ${services.length === 0 ? '<tr><td colspan="2" class="empty">No services yet</td></tr>' : ''}
+        </tbody></table></div>
+      `;
+    }
+    
+    // Assets Page
+    else if (currentPage === 'assets') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><h3>📦 Assets</h3><button class="btn-primary" onclick="showAddAssetModal()">+ Add Asset</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Name</th><th>Type</th><th>Model</th><th>Serial #</th></tr></thead><tbody>
+          ${assets.map(a => `<tr><td><strong>${a.name}</strong></td><td>${a.asset_type || '-'}</td><td>${a.model || '-'}</td><td>${a.serial_number || '-'}</td></tr>`).join('')}
+          ${assets.length === 0 ? '<tr><td colspan="4" class="empty">No assets yet</td></tr>' : ''}
+        </tbody></table></div>
+      `;
+    }
+    
+    // Quotations Page
+    else if (currentPage === 'quotations') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><h3>📝 Quotations</h3><button class="btn-primary" onclick="showAddQuotationModal()">+ New Quotation</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Quote #</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th></tr></thead><tbody>
+          ${(() => { try { return quotations.map(q => `<tr><td>${q.quote_number || 'N/A'}</td><td>${q.client_name || '-'}</td><td>${q.date || '-'}</td><td>${sym} ${(q.total || 0).toLocaleString()}</td><td><span class="badge badge-pending">${q.status || 'Draft'}</span></td></tr>`).join(''); } catch(e) { return ''; } })()}
+          <tr><td colspan="5" class="empty">No quotations yet</td></tr>
+        </tbody></table></div>
+      `;
+    }
+  }
+
+  // ==================== MODAL FUNCTIONS ====================
+  
+  window.showAddCustomerModal = async () => {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content">
+        <h3>➕ Add New Customer</h3>
+        <label>Customer Name *</label><input type="text" id="custName" placeholder="e.g., Al Noor Villa">
+        <label>Contact Person</label><input type="text" id="custContact" placeholder="e.g., Ahmed">
+        <label>Email</label><input type="email" id="custEmail" placeholder="email@example.com">
+        <label>Phone</label><input type="text" id="custPhone" placeholder="+971 50 123 4567">
+        <label>Address</label><textarea id="custAddress" rows="2" placeholder="Full address"></textarea>
+        <label>Currency</label><select id="custCurrency"><option value="AED">AED - UAE Dirham</option><option value="EUR">EUR - Euro</option></select>
+        <div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Save Customer</button></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('cancelBtn').onclick = () => modal.remove();
+    document.getElementById('saveBtn').onclick = async () => {
+      const name = document.getElementById('custName').value;
+      if (!name) { alert('Customer name required'); return; }
+      await fetchAPI('/clients', { method: 'POST', body: JSON.stringify({ 
+        name, contact: document.getElementById('custContact').value, email: document.getElementById('custEmail').value,
+        phone: document.getElementById('custPhone').value, address: document.getElementById('custAddress').value,
+        currency: document.getElementById('custCurrency').value 
+      }) });
+      modal.remove(); renderApp();
+    };
+  };
+
+  window.showAddSiteModal = async () => {
+    const clients = await fetchAPI('/clients');
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content">
+        <h3>📍 Add New Site</h3>
+        <label>Customer *</label><select id="siteCustomerId">${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select>
+        <label>Site Name *</label><input type="text" id="siteName" placeholder="e.g., Main Office, Warehouse A">
+        <label>Address</label><textarea id="siteAddress" rows="2" placeholder="Site address"></textarea>
+        <label>Contact Person</label><input type="text" id="siteContact" placeholder="Site contact name">
+        <label>Phone</label><input type="text" id="sitePhone" placeholder="Site phone number">
+        <div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Save Site</button></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('cancelBtn').onclick = () => modal.remove();
+    document.getElementById('saveBtn').onclick = async () => {
+      const customer_id = document.getElementById('siteCustomerId').value;
+      const name = document.getElementById('siteName').value;
+      if (!name) { alert('Site name required'); return; }
+      await fetchAPI('/sites', { method: 'POST', body: JSON.stringify({ 
+        customer_id, name, address: document.getElementById('siteAddress').value,
+        contact_person: document.getElementById('siteContact').value, phone: document.getElementById('sitePhone').value 
+      }) });
+      modal.remove(); renderApp();
+    };
+  };
+
+  window.showAddJobModal = async () => {
+    const clients = await fetchAPI('/clients');
+    const techs = await fetchAPI('/technicians');
+    const sites = await fetchAPI('/sites');
+    const services = await fetchAPI('/services');
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content">
+        <h3>➕ Create New Job</h3>
+        <label>Customer *</label><select id="jobCustomerId">${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select>
+        <label>Site</label><select id="jobSiteId"><option value="">None</option></select>
+        <label>Service *</label><input type="text" id="jobService" list="serviceList" placeholder="e.g., AC Maintenance"><datalist id="serviceList">${services.map(s => `<option value="${s.name}">`).join('')}</datalist>
+        <label>Technician</label><select id="jobTechnician"><option value="">Unassigned</option>${techs.map(t => `<option value="${t.name}">${t.name}</option>`).join('')}</select>
+        <label>Priority</label><select id="jobPriority"><option>High</option><option selected>Medium</option><option>Low</option></select>
+        <label>Status</label><select id="jobStatus"><option>Assigned</option><option>In Progress</option><option>Completed</option></select>
+        <label>Description</label><textarea id="jobDesc" rows="2" placeholder="Job details..."></textarea>
+        <div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Create Job</button></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    const customerSelect = document.getElementById('jobCustomerId');
+    const siteSelect = document.getElementById('jobSiteId');
+    customerSelect.onchange = () => {
+      const filtered = sites.filter(s => s.customer_id === customerSelect.value);
+      siteSelect.innerHTML = '<option value="">None</option>' + filtered.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    };
+    customerSelect.onchange();
+    
+    document.getElementById('cancelBtn').onclick = () => modal.remove();
+    document.getElementById('saveBtn').onclick = async () => {
+      const customerId = customerSelect.value;
+      const customerName = customerSelect.options[customerSelect.selectedIndex]?.text;
+      const service = document.getElementById('jobService').value;
+      if (!customerId || !service) { alert('Customer and Service required'); return; }
+      await fetchAPI('/jobs', { method: 'POST', body: JSON.stringify({ 
+        customerId, customerName, site_id: document.getElementById('jobSiteId').value || null,
+        service, technician: document.getElementById('jobTechnician').value || null,
+        priority: document.getElementById('jobPriority').value, status: document.getElementById('jobStatus').value,
+        description: document.getElementById('jobDesc').value 
+      }) });
+      modal.remove(); renderApp();
+    };
+  };
+
+  window.showAddInvoiceModal = async () => {
+    const clients = await fetchAPI('/clients');
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content">
+        <h3>🧾 Create New Invoice</h3>
+        <label>Client Name *</label><select id="invClientId">${clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('')}</select>
+        <label>Description</label><input type="text" id="invDesc" placeholder="Service description">
+        <label>Amount *</label><input type="number" id="invAmount" step="0.01" placeholder="0.00">
+        <label>Issue Date</label><input type="date" id="invDate" value="${new Date().toISOString().slice(0,10)}">
+        <label>Due Date</label><input type="date" id="invDueDate">
+        <div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Create Invoice</button></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('cancelBtn').onclick = () => modal.remove();
+    document.getElementById('saveBtn').onclick = async () => {
+      const client_name = document.getElementById('invClientId').value;
+      const amount = parseFloat(document.getElementById('invAmount').value);
+      if (!client_name || !amount) { alert('Client and Amount required'); return; }
+      await fetchAPI('/invoices', { method: 'POST', body: JSON.stringify({ 
+        client_name, description: document.getElementById('invDesc').value, amount,
+        date: document.getElementById('invDate').value, due_date: document.getElementById('invDueDate').value,
+        status: 'Pending' 
+      }) });
+      modal.remove(); renderApp();
+    };
+  };
+
+  window.showAddTechnicianModal = async () => {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content">
+        <h3>🔧 Add Technician</h3>
+        <label>Full Name *</label><input type="text" id="techName" placeholder="e.g., Ahmed K.">
+        <label>Role / Specialization</label><input type="text" id="techRole" placeholder="e.g., HVAC Specialist">
+        <label>Email</label><input type="email" id="techEmail" placeholder="tech@company.com">
+        <label>Phone</label><input type="text" id="techPhone" placeholder="+971 50 123 4567">
+        <div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Save Technician</button></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('cancelBtn').onclick = () => modal.remove();
+    document.getElementById('saveBtn').onclick = async () => {
+      const name = document.getElementById('techName').value;
+      if (!name) { alert('Technician name required'); return; }
+      await fetchAPI('/technicians', { method: 'POST', body: JSON.stringify({ 
+        name, role: document.getElementById('techRole').value, email: document.getElementById('techEmail').value,
+        phone: document.getElementById('techPhone').value, active: true 
+      }) });
+      modal.remove(); renderApp();
+    };
+  };
+
+  window.showAddAmcModal = async () => {
+    const clients = await fetchAPI('/clients');
+    const sites = await fetchAPI('/sites');
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content">
+        <h3>📑 New AMC Contract</h3>
+        <label>Client *</label><select id="amcClientId">${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select>
+        <label>Site</label><select id="amcSiteId"><option value="">None</option></select>
+        <label>Visits per Year</label><input type="number" id="amcVisits" value="4">
+        <label>Start Date</label><input type="date" id="amcStart" value="${new Date().toISOString().slice(0,10)}">
+        <label>Expiry Date *</label><input type="date" id="amcExpiry">
+        <label>Contract Value (Optional)</label><input type="number" id="amcValue" step="0.01">
+        <div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Create Contract</button></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    const clientSelect = document.getElementById('amcClientId');
+    const siteSelect = document.getElementById('amcSiteId');
+    clientSelect.onchange = () => {
+      const filtered = sites.filter(s => s.customer_id === clientSelect.value);
+      siteSelect.innerHTML = '<option value="">None</option>' + filtered.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    };
+    
+    document.getElementById('cancelBtn').onclick = () => modal.remove();
+    document.getElementById('saveBtn').onclick = async () => {
+      const clientId = clientSelect.value;
+      const clientName = clientSelect.options[clientSelect.selectedIndex]?.text;
+      const expiry = document.getElementById('amcExpiry').value;
+      if (!clientId || !expiry) { alert('Client and Expiry date required'); return; }
+      await fetchAPI('/amcs', { method: 'POST', body: JSON.stringify({ 
+        clientId, clientName, site_id: document.getElementById('amcSiteId').value || null,
+        visits_per_year: parseInt(document.getElementById('amcVisits').value),
+        start_date: document.getElementById('amcStart').value, expiry, status: 'Active',
+        contract_value: parseFloat(document.getElementById('amcValue').value) || null
+      }) });
+      modal.remove(); renderApp();
+    };
+  };
+
+  window.showAddServiceModal = async () => {
+    const name = prompt('Enter service name:');
+    if (name) await fetchAPI('/services', { method: 'POST', body: JSON.stringify({ name }) });
+    renderApp();
+  };
+
+  window.showAddAssetModal = async () => {
+    const name = prompt('Asset name:'); if (!name) return;
+    const asset_type = prompt('Asset type (AC, Generator, Pump, etc.):');
+    await fetchAPI('/assets', { method: 'POST', body: JSON.stringify({ name, asset_type }) });
+    renderApp();
+  };
+
+  window.showAddQuotationModal = async () => {
+    const clients = await fetchAPI('/clients');
+    const client_id = prompt(`Client ID (${clients.map(c => c.id).join(', ')}):`);
+    if (client_id) await fetchAPI('/quotations', { method: 'POST', body: JSON.stringify({ client_id, date: new Date().toISOString().slice(0,10), line_items: [] }) });
+    renderApp();
+  };
+
+  window.updateJobStatus = async (id) => {
+    const newStatus = prompt('Update status (Assigned / In Progress / Completed):', 'In Progress');
+    if (newStatus) await fetchAPI(`/jobs/${id}`, { method: 'PUT', body: JSON.stringify({ status: newStatus }) });
+    renderApp();
+  };
+
+  window.deleteCustomer = async (id) => {
+    if (confirm('Delete this customer? All related sites and jobs will be affected.')) {
+      await fetchAPI(`/clients/${id}`, { method: 'DELETE' });
+      renderApp();
+    }
+  };
+
+  window.deleteSite = async (id) => {
+    if (confirm('Delete this site?')) {
+      await fetchAPI(`/sites/${id}`, { method: 'DELETE' });
+      renderApp();
+    }
+  };
+
+  window.deleteTechnician = async (id) => {
+    if (confirm('Delete this technician?')) {
+      await fetchAPI(`/technicians/${id}`, { method: 'DELETE' });
+      renderApp();
+    }
+  };
+
+  window.deleteService = async (id) => {
+    if (confirm('Delete this service?')) {
+      await fetchAPI(`/services/${id}`, { method: 'DELETE' });
+      renderApp();
+    }
+  };
+
+  window.viewCustomerSites = (id) => {
+    renderApp(); // Refresh to show sites
+  };
+
+  window.toggleSidebar = toggleSidebar;
+  window.closeSidebar = closeSidebar;
+  window.login = login;
+  window.signup = signup;
+  window.demoLogin = demoLogin;
+  window.logout = logout;
+  window.toggleForm = toggleForm;
+
+  renderApp();
+</script>
+</body>
+</html>

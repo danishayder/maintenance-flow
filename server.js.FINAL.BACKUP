@@ -15,7 +15,6 @@ const assetsRoutes = require('./routes/assets');
 const quotationsRoutes = require('./routes/quotations');
 const sitesRoutes = require('./routes/sites');
 const contactsRoutes = require('./routes/contacts');
-const amcVisitsRoutes = require('./routes/amcVisits');
 
 const app = express();
 app.use(cors());
@@ -36,7 +35,6 @@ app.use('/api/assets', authMiddleware, assetsRoutes);
 app.use('/api/quotations', authMiddleware, quotationsRoutes);
 app.use('/api/sites', authMiddleware, sitesRoutes);
 app.use('/api/contacts', authMiddleware, contactsRoutes);
-app.use('/api/amc-visits', authMiddleware, amcVisitsRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

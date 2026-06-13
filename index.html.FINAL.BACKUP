@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MaintenanceFlow PRO</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f0ede8; }
+    
+    /* Login */
+    .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .login-container h2 { margin-bottom: 10px; text-align: center; }
+    .login-container p { color: #666; margin-bottom: 30px; text-align: center; }
+    .login-container input { width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; }
+    .login-container button { width: 100%; padding: 12px; background: #d4500a; color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; margin-bottom: 12px; }
+    .login-container button:hover { background: #b84308; }
+    .demo-btn { background: #1a1a1a !important; }
+    .demo-btn:hover { background: #333 !important; }
+    .error-msg { color: #dc2626; text-align: center; margin-top: 12px; font-size: 14px; }
+    .divider { text-align: center; margin: 20px 0; color: #999; position: relative; }
+    .divider::before, .divider::after { content: ""; position: absolute; top: 50%; width: 45%; height: 1px; background: #ddd; }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+    
+    /* Dashboard */
+    .dashboard { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    .header { background: white; padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: white; padding: 20px; border-radius: 12px; }
+    .stat-value { font-size: 28px; font-weight: bold; margin-top: 8px; }
+    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+    button { background: #1a1a1a; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+    button:hover { background: #d4500a; }
+    .logout-btn { background: #e0e0e0; color: #333; }
+    .empty { text-align: center; padding: 40px; color: #999; }
+    .nav-buttons { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .nav-btn { background: #1a1a1a; padding: 10px 20px; }
+    .nav-btn.active { background: #d4500a; }
+  </style>
+</head>
+<body>
+<div id="app">Loading...</div>
+
+<script>
+  const API = '/api';
+  let token = null;
+  let user = null;
+  let currentPage = 'dashboard';
+
+  async function fetchAPI(endpoint, options = {}) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(API + endpoint, { ...options, headers });
+    if (res.status === 401) { logout(); throw new Error('Session expired'); }
+    if (!res.ok) throw new Error((await res.json()).error || 'Request failed');
+    return res.json();
+  }
+
+  // Login with email and password
+  async function login(email, password) {
+    try {
+      const res = await fetch(API + '/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      if (!res.ok) throw new Error('Invalid email or password');
+      const data = await res.json();
+      token = data.token;
+      user = data.user;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      renderApp();
+    } catch (err) {
+      document.getElementById('errorMsg').innerText = err.message;
+    }
+  }
+
+  // Signup for new account
+  async function signup(email, password, company_name, currency = 'AED') {
+    try {
+      const res = await fetch(API + '/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, company_name, currency })
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Signup failed');
+      const data = await res.json();
+      token = data.token;
+      user = data.user;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      renderApp();
+    } catch (err) {
+      document.getElementById('errorMsg').innerText = err.message;
+    }
+  }
+
+  async function demoLogin() {
+    try {
+      const res = await fetch(API + '/auth/demo', { method: 'POST' });
+      const data = await res.json();
+      token = data.token;
+      user = data.user;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      renderApp();
+    } catch (err) {
+      alert('Demo login failed: ' + err.message);
+    }
+  }
+
+  function logout() {
+    token = null; user = null;
+    localStorage.clear();
+    renderApp();
+  }
+
+  let showSignup = false;
+  function toggleForm() {
+    showSignup = !showSignup;
+    renderApp();
+  }
+
+  async function renderApp() {
+    const savedToken = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    
+    if (savedToken && savedUser && !token) {
+      token = savedToken;
+      user = JSON.parse(savedUser);
+      try {
+        await fetchAPI('/clients');
+      } catch { logout(); return; }
+    }
+
+    if (!token || !user) {
+      document.getElementById('app').innerHTML = `
+        <div class="login-container">
+          <h2>🔧 MaintenanceFlow PRO</h2>
+          <p>HVAC · MEP · Electrical · Plumbing · Civil</p>
+          
+          ${!showSignup ? `
+            <input type="email" id="loginEmail" placeholder="Email" value="demo@maintain.com">
+            <input type="password" id="loginPassword" placeholder="Password" value="demo123">
+            <button onclick="login(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)">Sign In</button>
+            <div class="divider">or</div>
+            <button class="demo-btn" onclick="demoLogin()">🚀 Try Demo</button>
+            <p style="text-align: center; margin-top: 20px;">New user? <a href="#" onclick="toggleForm(); return false;">Create account</a></p>
+          ` : `
+            <input type="text" id="signupCompany" placeholder="Company Name">
+            <input type="email" id="signupEmail" placeholder="Email">
+            <input type="password" id="signupPassword" placeholder="Password">
+            <select id="signupCurrency">
+              <option value="AED">AED (UAE Dirham)</option>
+              <option value="EUR">EUR (Euro)</option>
+            </select>
+            <button onclick="signup(document.getElementById('signupEmail').value, document.getElementById('signupPassword').value, document.getElementById('signupCompany').value, document.getElementById('signupCurrency').value)">Create Account</button>
+            <div class="divider">or</div>
+            <button class="demo-btn" onclick="demoLogin()">🚀 Try Demo</button>
+            <p style="text-align: center; margin-top: 20px;">Already have an account? <a href="#" onclick="toggleForm(); return false;">Sign In</a></p>
+          `}
+          <div id="errorMsg" class="error-msg"></div>
+        </div>
+      `;
+      return;
+    }
+
+    await showDashboard();
+  }
+
+  async function showDashboard() {
+    let jobs = [], clients = [], techs = [], invoices = [], amcs = [], sites = [];
+    try {
+      [jobs, clients, techs, invoices, amcs, sites] = await Promise.all([
+        fetchAPI('/jobs'), fetchAPI('/clients'), fetchAPI('/technicians'),
+        fetchAPI('/invoices'), fetchAPI('/amcs'), fetchAPI('/sites')
+      ]);
+    } catch(e) { console.error(e); }
+
+    const openJobs = jobs.filter(j => j.status !== 'Completed').length;
+    const totalRevenue = invoices.reduce((s,i) => s + (i.amount || 0), 0);
+    const activeTechs = techs.filter(t => t.active).length;
+    const sym = user?.currency === 'EUR' ? '€' : 'AED';
+
+    let content = '';
+    
+    if (currentPage === 'dashboard') {
+      content = `
+        <div class="stats">
+          <div class="stat-card"><div>📋 Open Jobs</div><div class="stat-value">${openJobs}</div></div>
+          <div class="stat-card"><div>📑 AMC Contracts</div><div class="stat-value">${amcs.length}</div></div>
+          <div class="stat-card"><div>🔧 Active Techs</div><div class="stat-value">${activeTechs}</div></div>
+          <div class="stat-card"><div>💰 Revenue</div><div class="stat-value">${sym} ${totalRevenue.toLocaleString()}</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>📋 Recent Jobs</h3><button onclick="showAddJob()">+ New Job</button></div>
+          <table><thead><tr><th>Customer</th><th>Service</th><th>Technician</th><th>Status</th></tr></thead><tbody>
+            ${jobs.slice(0,5).map(j => `<tr><td>${j.customer_name || '-'}</td><td>${j.service || '-'}</td><td>${j.technician || '-'}</td><td>${j.status || 'pending'}</td></tr>`).join('')}
+            ${jobs.length === 0 ? '<tr><td colspan="4" class="empty">No jobs yet</td></tr>' : ''}
+          </tbody></table>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>👥 Customers</h3><button onclick="showAddCustomer()">+ Add Customer</button></div>
+          <table><thead><tr><th>Name</th><th>Contact</th><th>Address</th></tr></thead><tbody>
+            ${clients.map(c => `<tr><td>${c.name}</td><td>${c.contact || '-'}</td><td>${c.address || '-'}</td></tr>`).join('')}
+            ${clients.length === 0 ? '<tr><td colspan="3" class="empty">No customers yet</td></tr>' : ''}
+          </tbody></table>
+        </div>
+      `;
+    }
+    
+    else if (currentPage === 'customers') {
+      content = `
+        <div class="card"><div class="card-header"><h3>👥 Customers</h3><button onclick="showAddCustomer()">+ Add Customer</button></div>
+        <table><thead><tr><th>Name</th><th>Contact</th><th>Address</th><th>Sites</th></tr></thead><tbody>
+          ${clients.map(c => `<tr><td><strong>${c.name}</strong></td><td>${c.contact || '-'}</td><td>${c.address || '-'}</td><td><button onclick="alert('Sites: ${sites.filter(s=>s.customer_id===c.id).map(s=>s.name).join(', ') || 'None'}')">View Sites (${sites.filter(s=>s.customer_id===c.id).length})</button></td></tr>`).join('')}
+        </tbody></table></div>
+      `;
+    }
+    
+    else if (currentPage === 'sites') {
+      content = `
+        <div class="card"><div class="card-header"><h3>📍 Sites</h3><button onclick="showAddSite()">+ Add Site</button></div>
+        <table><thead><tr><th>Site Name</th><th>Customer</th><th>Address</th><th>Contact</th></tr></thead><tbody>
+          ${sites.map(s => { const c = clients.find(c => c.id === s.customer_id); return `<tr><td><strong>${s.name}</strong></td><td>${c ? c.name : '-'}</td><td>${s.address || '-'}</td><td>${s.contact_person || '-'}</td></tr>`; }).join('')}
+          ${sites.length === 0 ? '<tr><td colspan="4" class="empty">No sites yet</td></tr>' : ''}
+        </tbody></table></div>
+      `;
+    }
+    
+    else if (currentPage === 'invoices') {
+      content = `
+        <div class="stats"><div class="stat-card"><div>Total Invoices</div><div class="stat-value">${invoices.length}</div></div>
+        <div class="stat-card"><div>Total Amount</div><div class="stat-value">${sym} ${totalRevenue.toLocaleString()}</div></div></div>
+        <div class="card"><div class="card-header"><h3>🧾 Invoices</h3><button onclick="showAddInvoice()">+ Create Invoice</button></div>
+        <table><thead><tr><th>Client</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead><tbody>
+          ${invoices.map(i => `<tr><td>${i.client_name || '-'}</td><td>${i.description || '-'}</td><td>${sym} ${i.amount || 0}</td><td><span style="background:#d1fae5;padding:4px 10px;border-radius:20px;">${i.status || 'Pending'}</span></td></tr>`).join('')}
+        </tbody></table></div>
+      `;
+    }
+    
+    else if (currentPage === 'technicians') {
+      content = `
+        <div class="card"><div class="card-header"><h3>🔧 Technicians</h3><button onclick="showAddTechnician()">+ Add Technician</button></div>
+        <table><thead><tr><th>Name</th><th>Role</th><th>Status</th></tr></thead><tbody>
+          ${techs.map(t => `<tr><td><strong>${t.name}</strong></td><td>${t.role || '-'}</td><td>${t.active ? '✅ Active' : '❌ Inactive'}</td></tr>`).join('')}
+        </tbody></table></div>
+      `;
+    }
+    
+    else if (currentPage === 'amc') {
+      content = `
+        <div class="card"><div class="card-header"><h3>📑 AMC Contracts</h3><button onclick="showAddAmc()">+ Add Contract</button></div>
+        <table><thead><tr><th>Client</th><th>Visits/Year</th><th>Expiry</th><th>Status</th></tr></thead><tbody>
+          ${amcs.map(a => `<tr><td>${a.client_name}</td><td>${a.visits_per_year || 4}</td><td>${a.expiry || '-'}</td><td><span style="background:#d1fae5;padding:4px 10px;border-radius:20px;">${a.status || 'Active'}</span></td></tr>`).join('')}
+        </tbody></table></div>
+      `;
+    }
+
+    document.getElementById('app').innerHTML = `
+      <div class="dashboard">
+        <div class="header">
+          <h2>🔧 MaintenanceFlow PRO</h2>
+          <div><span>👤 ${user?.email || user?.company_name || 'Demo'} (${user?.currency || 'AED'})</span>
+          <button class="logout-btn" onclick="logout()" style="margin-left: 16px;">Logout</button></div>
+        </div>
+        <div class="nav-buttons">
+          <button class="nav-btn ${currentPage === 'dashboard' ? 'active' : ''}" onclick="changePage('dashboard')">Dashboard</button>
+          <button class="nav-btn ${currentPage === 'customers' ? 'active' : ''}" onclick="changePage('customers')">Customers</button>
+          <button class="nav-btn ${currentPage === 'sites' ? 'active' : ''}" onclick="changePage('sites')">Sites</button>
+          <button class="nav-btn ${currentPage === 'invoices' ? 'active' : ''}" onclick="changePage('invoices')">Invoices</button>
+          <button class="nav-btn ${currentPage === 'technicians' ? 'active' : ''}" onclick="changePage('technicians')">Technicians</button>
+          <button class="nav-btn ${currentPage === 'amc' ? 'active' : ''}" onclick="changePage('amc')">AMC Contracts</button>
+        </div>
+        ${content}
+      </div>
+    `;
+  }
+
+  function changePage(page) { currentPage = page; renderApp(); }
+
+  window.showAddCustomer = async () => {
+    const name = prompt('Customer name:'); if (!name) return;
+    const contact = prompt('Contact:'); const address = prompt('Address:');
+    await fetchAPI('/clients', { method: 'POST', body: JSON.stringify({ name, contact, address }) });
+    renderApp();
+  };
+
+  window.showAddSite = async () => {
+    const clients = await fetchAPI('/clients');
+    const customerId = prompt(`Customer ID (${clients.map(c => c.id + ': ' + c.name).join(', ')}):`);
+    const name = prompt('Site name:'); if (!name) return;
+    const address = prompt('Address:');
+    await fetchAPI('/sites', { method: 'POST', body: JSON.stringify({ customer_id: customerId, name, address }) });
+    renderApp();
+  };
+
+  window.showAddJob = async () => {
+    const clients = await fetchAPI('/clients');
+    const techs = await fetchAPI('/technicians');
+    const customerName = prompt(`Customer (${clients.map(c => c.name).join(', ')}):`);
+    const service = prompt('Service:'); if (!service) return;
+    const technician = prompt(`Technician (${techs.map(t => t.name).join(', ')}):`);
+    await fetchAPI('/jobs', { method: 'POST', body: JSON.stringify({ customerName, service, technician, priority: 'Medium', status: 'Assigned' }) });
+    renderApp();
+  };
+
+  window.showAddInvoice = async () => {
+    const client_name = prompt('Client name:'); if (!client_name) return;
+    const amount = parseFloat(prompt('Amount:')); if (!amount) return;
+    const description = prompt('Description:');
+    await fetchAPI('/invoices', { method: 'POST', body: JSON.stringify({ client_name, description, amount, date: new Date().toISOString().slice(0,10), status: 'Pending' }) });
+    renderApp();
+  };
+
+  window.showAddTechnician = async () => {
+    const name = prompt('Technician name:'); if (!name) return;
+    const role = prompt('Role:');
+    await fetchAPI('/technicians', { method: 'POST', body: JSON.stringify({ name, role, active: true }) });
+    renderApp();
+  };
+
+  window.showAddAmc = async () => {
+    const clients = await fetchAPI('/clients');
+    const clientId = prompt(`Client ID (${clients.map(c => c.id + ': ' + c.name).join(', ')}):`);
+    const clientName = clients.find(c => c.id === clientId)?.name;
+    const visits_per_year = parseInt(prompt('Visits per year:', '4'));
+    const expiry = prompt('Expiry date (YYYY-MM-DD):');
+    await fetchAPI('/amcs', { method: 'POST', body: JSON.stringify({ clientId, clientName, visits_per_year, expiry, status: 'Active' }) });
+    renderApp();
+  };
+
+  window.login = login;
+  window.signup = signup;
+  window.demoLogin = demoLogin;
+  window.logout = logout;
+  window.changePage = changePage;
+  window.toggleForm = toggleForm;
+
+  renderApp();
+</script>
+</body>
+</html>

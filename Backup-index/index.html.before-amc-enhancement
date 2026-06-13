@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>MaintenanceFlow PRO | Live Maintenance Ops</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f0ede8;
+      --surface: #faf9f7;
+      --surface-2: #f4f1ec;
+      --border: #e2ddd6;
+      --text: #1a1714;
+      --text-muted: #8a8279;
+      --accent: #d4500a;
+      --accent-light: #f5e6dc;
+      --green: #1e6845;
+      --green-light: #d6ede3;
+      --amber: #b45309;
+      --amber-light: #fef3c7;
+      --blue: #1e40af;
+      --blue-light: #dbeafe;
+      --shadow: 0 1px 3px rgba(26,23,20,0.06), 0 4px 16px rgba(26,23,20,0.04);
+      --shadow-md: 0 8px 28px rgba(26,23,20,0.12);
+      --radius: 20px;
+      --radius-sm: 12px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Login */
+    .login-container { max-width: 420px; margin: 100px auto; background: var(--surface); padding: 40px; border-radius: var(--radius); box-shadow: var(--shadow-md); text-align: center; border: 1px solid var(--border); }
+    .login-container h2 { font-family: 'Syne', sans-serif; font-size: 1.8rem; margin-bottom: 10px; }
+    .login-container h2 span { color: var(--accent); }
+    .login-container p { color: var(--text-muted); margin-bottom: 30px; }
+    .login-container input, .login-container select { width: 100%; padding: 12px; margin-bottom: 16px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; background: white; }
+    .login-container button { width: 100%; padding: 12px; background: var(--text); color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; margin-bottom: 12px; font-weight: 500; transition: all 0.2s; }
+    .login-container button:hover { background: var(--accent); transform: translateY(-1px); }
+    .demo-btn { background: var(--accent) !important; }
+    .demo-btn:hover { background: #b84308 !important; }
+    .error-msg { color: #dc2626; text-align: center; margin-top: 12px; font-size: 14px; }
+    .divider { text-align: center; margin: 20px 0; color: var(--text-muted); position: relative; }
+    .divider::before, .divider::after { content: ""; position: absolute; top: 50%; width: 45%; height: 1px; background: var(--border); }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    /* Dashboard Layout - Left Align Menu */
+    .app-container { display: flex; min-height: 100vh; }
+    .sidebar { width: 280px; background: var(--text); color: white; position: fixed; height: 100vh; overflow-y: auto; left: 0; top: 0; z-index: 100; }
+    .sidebar-logo { padding: 28px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+    .sidebar-logo h2 { font-family: 'Syne', sans-serif; font-size: 1.4rem; color: white; }
+    .sidebar-logo span { color: var(--accent); }
+    .sidebar-logo p { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 6px; }
+    .nav-item { display: flex; align-items: center; gap: 14px; padding: 12px 24px; cursor: pointer; color: rgba(255,255,255,0.7); transition: all 0.2s; font-size: 0.9rem; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+    .nav-item.active { background: var(--accent); color: white; }
+    .nav-item span:first-child { font-size: 1.2rem; }
+
+    .main-content { flex: 1; margin-left: 280px; padding: 24px 32px; }
+    
+    /* Header */
+    .header { background: var(--surface); border-radius: var(--radius); padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; border: 1px solid var(--border); box-shadow: var(--shadow); flex-wrap: wrap; gap: 16px; }
+    .header-brand { display: flex; align-items: center; gap: 16px; }
+    .header-icon { width: 48px; height: 48px; background: var(--text); border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+    .header-icon svg { width: 26px; height: 26px; stroke: var(--surface); stroke-width: 1.8; fill: none; }
+    .header h1 { font-family: 'Syne', sans-serif; font-size: 1.55rem; font-weight: 800; letter-spacing: -0.02em; }
+    .header h1 span { color: var(--accent); }
+    .header p { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+    .header-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .user-info { display: flex; align-items: center; gap: 16px; }
+    
+    /* Buttons */
+    .btn-primary { background: var(--text); color: white; border: none; padding: 10px 20px; border-radius: var(--radius-sm); font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+    .btn-primary:hover { background: var(--accent); transform: translateY(-1px); }
+    .btn-secondary { background: transparent; border: 1.5px solid var(--border); padding: 10px 20px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; background: white; }
+    .btn-secondary:hover { border-color: var(--text-muted); background: var(--surface-2); }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.8rem; }
+    .logout-btn { background: transparent; border: 1.5px solid var(--border); padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; }
+    .logout-btn:hover { background: var(--surface-2); }
+    
+    /* Stats Cards */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); position: relative; transition: all 0.2s; }
+    .stat-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); border-radius: 3px 3px 0 0; opacity: 0; transition: opacity 0.2s; }
+    .stat-card:hover::after { opacity: 1; }
+    .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 600; }
+    .stat-value { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; margin-top: 10px; letter-spacing: -0.03em; }
+    
+    /* Main Grid (2 columns) */
+    .main-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; margin-bottom: 28px; }
+    
+    /* Cards */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .card-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+    
+    /* Tables */
+    .table-responsive { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); padding-bottom: 12px; border-bottom: 1px solid var(--border); text-align: left; letter-spacing: 0.5px; }
+    tbody td { padding: 14px 0; font-size: 0.85rem; border-bottom: 1px solid var(--surface-2); vertical-align: middle; }
+    tbody tr:hover { background: var(--surface-2); }
+    
+    /* Badges & Priority */
+    .badge { display: inline-block; font-size: 0.7rem; font-weight: 500; padding: 4px 12px; border-radius: 100px; }
+    .badge-progress { background: var(--blue-light); color: var(--blue); }
+    .badge-assigned { background: var(--amber-light); color: var(--amber); }
+    .badge-completed { background: var(--green-light); color: var(--green); }
+    .badge-active { background: var(--green-light); color: var(--green); }
+    .badge-pending { background: var(--amber-light); color: var(--amber); }
+    .priority-dot { display: inline-flex; align-items: center; gap: 6px; }
+    .priority-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; }
+    .priority-high::before { background: var(--accent); }
+    .priority-medium::before { background: var(--amber); }
+    .priority-low::before { background: var(--green); }
+    
+    /* Dispatch Cards */
+    .dispatch-list { display: flex; flex-direction: column; gap: 12px; }
+    .dispatch-card { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px; display: flex; align-items: center; gap: 12px; transition: all 0.2s; }
+    .dispatch-card:hover { background: var(--surface-2); }
+    .dispatch-avatar { width: 44px; height: 44px; background: var(--surface-2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; color: var(--text); }
+    .dispatch-info { flex: 1; }
+    .dispatch-name { font-size: 0.9rem; font-weight: 600; }
+    .dispatch-role { font-size: 0.7rem; color: var(--text-muted); }
+    .dispatch-count { background: var(--accent-light); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; color: var(--accent); }
+    
+    /* Bottom Grid (AMC + Quick Actions) */
+    .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
+    .amc-list { display: flex; flex-direction: column; gap: 12px; }
+    .amc-item { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
+    .amc-item:hover { background: var(--surface-2); }
+    .amc-client { font-weight: 600; font-size: 0.85rem; }
+    .amc-expiry { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
+    .amc-visits { font-size: 0.7rem; font-weight: 500; text-align: right; }
+    
+    /* Quick Actions Grid */
+    .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .action-btn { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 18px; text-align: left; background: white; cursor: pointer; transition: all 0.2s; }
+    .action-btn:hover { border-color: var(--accent); background: var(--surface-2); transform: translateY(-2px); }
+    .action-btn-title { font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; }
+    .action-btn-sub { font-size: 0.7rem; color: var(--text-muted); }
+    
+    /* KPI Dashboard */
+    .dashboard-banner { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 28px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; }
+    .kpi-item { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 20px; text-align: center; }
+    .kpi-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+    .kpi-value { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-top: 8px; }
+    
+    /* Modal */
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+    .modal-content { background: var(--surface); max-width: 520px; width: 90%; border-radius: var(--radius); padding: 28px; border: 1px solid var(--border); box-shadow: var(--shadow-md); max-height: 90vh; overflow-y: auto; }
+    .modal-content h3 { font-family: 'Syne', sans-serif; margin-bottom: 20px; font-size: 1.3rem; }
+    .modal-content label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+    .modal-content input, .modal-content select, .modal-content textarea { width: 100%; padding: 12px; margin-bottom: 16px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; background: white; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+    
+    .btn-sm { background: var(--text); color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; }
+    .btn-danger { background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; }
+    .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+    .empty { text-align: center; padding: 40px; color: var(--text-muted); }
+    
+    /* Mobile Menu */
+    .mobile-menu-btn { display: none; position: fixed; top: 16px; left: 16px; z-index: 201; background: var(--text); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; }
+    .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; }
+    
+    /* Page Container */
+    .page-content { display: block; }
+    .full-width { width: 100%; }
+    
+    /* Mobile Responsive */
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .main-grid, .bottom-grid { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: repeat(1, 1fr); }
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; width: 280px; }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: 70px 16px 16px 16px; }
+      .mobile-menu-btn { display: block; }
+      .sidebar-overlay.open { display: block; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .header { flex-direction: column; align-items: flex-start; }
+      .header-actions { width: 100%; justify-content: space-between; }
+      .actions-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">Loading...</div>
+
+<script>
+  const API = '/api';
+  let token = null;
+  let user = null;
+  let currentPage = 'dashboard';
+  let sidebarOpen = false;
+
+  function toggleSidebar() { sidebarOpen = !sidebarOpen; updateSidebar(); }
+  function closeSidebar() { sidebarOpen = false; updateSidebar(); }
+  function updateSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (sidebar) sidebar.classList.toggle('open', sidebarOpen);
+    if (overlay) overlay.classList.toggle('open', sidebarOpen);
+  }
+
+  async function fetchAPI(endpoint, options = {}) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(API + endpoint, { ...options, headers });
+    if (res.status === 401) { logout(); throw new Error('Session expired'); }
+    if (!res.ok) throw new Error((await res.json()).error || 'Request failed');
+    return res.json();
+  }
+
+  async function login(email, password) {
+    try {
+      const res = await fetch(API + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+      if (!res.ok) throw new Error('Invalid email or password');
+      const data = await res.json();
+      token = data.token; user = data.user;
+      localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user));
+      renderApp();
+    } catch (err) { document.getElementById('errorMsg') && (document.getElementById('errorMsg').innerText = err.message); }
+  }
+
+  async function signup(email, password, company_name, currency) {
+    try {
+      const res = await fetch(API + '/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, company_name, currency }) });
+      if (!res.ok) throw new Error((await res.json()).error || 'Signup failed');
+      const data = await res.json();
+      token = data.token; user = data.user;
+      localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user));
+      renderApp();
+    } catch (err) { document.getElementById('errorMsg') && (document.getElementById('errorMsg').innerText = err.message); }
+  }
+
+  async function demoLogin() {
+    try {
+      const res = await fetch(API + '/auth/demo', { method: 'POST' });
+      const data = await res.json();
+      token = data.token; user = data.user;
+      localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user));
+      renderApp();
+    } catch (err) { alert('Demo login failed: ' + err.message); }
+  }
+
+  function logout() { token = null; user = null; localStorage.clear(); renderApp(); }
+
+  let showSignup = false;
+  function toggleForm() { showSignup = !showSignup; renderApp(); }
+
+  function generatePDFInvoice(client, description, amount) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const sym = user?.currency === 'EUR' ? '€' : 'AED';
+    doc.setFont("helvetica");
+    doc.setFontSize(18); doc.text("MAINTENANCE FLOW PRO - INVOICE", 14, 20);
+    doc.setFontSize(10); doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 30);
+    doc.text(`Invoice #: INV-${Date.now()}`, 14, 36);
+    doc.autoTable({ startY: 45, head: [["Description", `Amount (${sym})`]], body: [[description, amount]], theme: "striped", styles: { fontSize: 10 } });
+    doc.text(`Customer: ${client}`, 14, doc.lastAutoTable.finalY + 10);
+    doc.text(`Total Amount: ${sym} ${amount}`, 14, doc.lastAutoTable.finalY + 18);
+    doc.text("Thank you for your business - Maintenance Flow", 14, doc.lastAutoTable.finalY + 28);
+    doc.save(`Invoice_${client.replace(/\s/g, "_")}.pdf`);
+  }
+
+  async function renderApp() {
+    const savedToken = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    
+    if (savedToken && savedUser && !token) {
+      token = savedToken;
+      user = JSON.parse(savedUser);
+      try { await fetchAPI('/clients'); } catch { logout(); return; }
+    }
+
+    if (!token || !user) {
+      document.getElementById('app').innerHTML = `
+        <div class="login-container">
+          <h2>Maintenance<span>Flow</span> PRO</h2>
+          <p>HVAC · MEP · Electrical · Plumbing · Civil</p>
+          ${!showSignup ? `
+            <input type="email" id="loginEmail" placeholder="Email" value="demo@maintain.com">
+            <input type="password" id="loginPassword" placeholder="Password" value="demo123">
+            <button onclick="login(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)">Sign In</button>
+            <div class="divider">or</div>
+            <button class="demo-btn" onclick="demoLogin()">🚀 Try Demo</button>
+            <p style="text-align: center; margin-top: 20px;">New user? <a href="#" onclick="toggleForm(); return false;">Create account</a></p>
+          ` : `
+            <input type="text" id="signupCompany" placeholder="Company Name">
+            <input type="email" id="signupEmail" placeholder="Email">
+            <input type="password" id="signupPassword" placeholder="Password">
+            <select id="signupCurrency"><option value="AED">AED (UAE Dirham)</option><option value="EUR">EUR (Euro)</option></select>
+            <button onclick="signup(document.getElementById('signupEmail').value, document.getElementById('signupPassword').value, document.getElementById('signupCompany').value, document.getElementById('signupCurrency').value)">Create Account</button>
+            <div class="divider">or</div>
+            <button class="demo-btn" onclick="demoLogin()">🚀 Try Demo</button>
+            <p style="text-align: center; margin-top: 20px;">Already have an account? <a href="#" onclick="toggleForm(); return false;">Sign In</a></p>
+          `}
+          <div id="errorMsg" class="error-msg"></div>
+        </div>
+      `;
+      return;
+    }
+    await showDashboard();
+  }
+
+  async function showDashboard() {
+    let jobs = [], clients = [], techs = [], invoices = [], amcs = [], sites = [], services = [], assets = [], quotations = [];
+    try {
+      [jobs, clients, techs, invoices, amcs, sites, services, assets, quotations] = await Promise.all([
+        fetchAPI('/jobs'), fetchAPI('/clients'), fetchAPI('/technicians'),
+        fetchAPI('/invoices'), fetchAPI('/amcs'), fetchAPI('/sites'),
+        fetchAPI('/services'), fetchAPI('/assets'), fetchAPI('/quotations')
+      ]);
+    } catch(e) { console.error(e); }
+
+    const openJobs = jobs.filter(j => j.status !== 'Completed').length;
+    const totalRevenue = invoices.reduce((s,i) => s + (i.amount || 0), 0);
+    const activeTechs = techs.filter(t => t.active).length;
+    const sym = user?.currency === 'EUR' ? '€' : 'AED';
+    const pendingInvoices = invoices.filter(i => i.status !== 'Paid').length;
+
+    const navItems = [
+      { page: 'dashboard', icon: '📊', label: 'Dashboard' },
+      { page: 'amc', icon: '📑', label: 'AMC Contracts' },
+      { page: 'tasks', icon: '⚡', label: 'Assigned Tasks' },
+      { page: 'invoices', icon: '🧾', label: 'Invoices' },
+      { page: 'assets', icon: '📦', label: 'Assets' },
+      { page: 'quotations', icon: '📝', label: 'Quotations' },
+      { page: 'customers', icon: '👥', label: 'Customers' },
+      { page: 'sites', icon: '📍', label: 'Sites' },
+      { page: 'technicians', icon: '🔧', label: 'Technicians' },
+      { page: 'services', icon: '📋', label: 'Services' }
+    ];
+
+    document.getElementById('app').innerHTML = `
+      <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+      <div class="app-container">
+        <div class="sidebar">
+          <div class="sidebar-logo">
+            <h2>Maint<span>Flow</span></h2>
+            <p>HVAC · MEP · Civil</p>
+          </div>
+          ${navItems.map(item => `
+            <div class="nav-item ${currentPage === item.page ? 'active' : ''}" data-page="${item.page}">
+              <span>${item.icon}</span>
+              <span>${item.label}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="main-content">
+          <div class="header">
+            <div class="header-brand">
+              <div class="header-icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+              <div><h1>Maintenance <span>Flow</span></h1><p>HVAC • MEP • Electrical • Plumbing • Civil</p></div>
+            </div>
+            <div class="header-actions">
+              <button class="btn-primary" id="quickTicketBtn">➕ Create Service Ticket</button>
+              <button class="btn-secondary" id="quickInvoiceHeaderBtn">🧾 Generate Invoice</button>
+              <div class="user-info">
+                <span>👤 ${user?.email || user?.company_name || 'Demo'} (${user?.currency || 'AED'})</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+              </div>
+            </div>
+          </div>
+          <div id="page-container"></div>
+        </div>
+      </div>
+    `;
+
+    document.querySelectorAll('.nav-item[data-page]').forEach(el => {
+      el.addEventListener('click', () => {
+        currentPage = el.dataset.page;
+        sidebarOpen = false; updateSidebar();
+        renderApp();
+      });
+    });
+
+    document.getElementById('quickTicketBtn')?.addEventListener('click', () => showAddJobModal());
+    document.getElementById('quickInvoiceHeaderBtn')?.addEventListener('click', () => showAddInvoiceModal());
+
+    const container = document.getElementById('page-container');
+    
+    // ==================== DASHBOARD PAGE (Enhanced with Prototype Design) ====================
+    if (currentPage === 'dashboard') {
+      // Calculate tech job counts for dispatch
+      const techsWithJobs = techs.map(t => ({
+        ...t,
+        activeJobs: jobs.filter(j => j.technician === t.name && j.status !== 'Completed').length
+      }));
+      
+      container.innerHTML = `
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Open Jobs</div><div class="stat-value">${openJobs}</div></div>
+          <div class="stat-card"><div class="stat-label">AMC Contracts</div><div class="stat-value">${amcs.length}</div></div>
+          <div class="stat-card"><div class="stat-label">Active Technicians</div><div class="stat-value">${activeTechs}</div></div>
+          <div class="stat-card"><div class="stat-label">Revenue (${sym})</div><div class="stat-value">${sym} ${totalRevenue.toLocaleString()}</div></div>
+        </div>
+
+        <div class="main-grid">
+          <!-- Live Jobs Table -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📋 Live Service Jobs</div>
+              <button class="btn-outline" onclick="showAddJobModal()">+ New Job</button>
+            </div>
+            <div class="table-responsive">
+              <table>
+                <thead><tr><th>Customer</th><th>Service</th><th>Technician</th><th>Priority</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody>
+                  ${jobs.slice(0,6).map(j => `
+                    <tr>
+                      <td>${j.customer_name || '-'}</td>
+                      <td>${j.service || '-'}</td>
+                      <td>${j.technician || 'Unassigned'}</td>
+                      <td><span class="priority-dot priority-${(j.priority || 'medium').toLowerCase()}">${j.priority || 'Medium'}</span></td>
+                      <td><span class="badge ${j.status === 'Completed' ? 'badge-completed' : (j.status === 'In Progress' ? 'badge-progress' : 'badge-assigned')}">${j.status || 'Assigned'}</span></td>
+                      <td><button class="btn-sm" onclick="updateJobStatus('${j.id}')">Update</button></td>
+                    </tr>
+                  `).join('')}
+                  ${jobs.length === 0 ? '<tr><td colspan="6" class="empty">No jobs yet. Click "+ New Job"</td></tr>' : ''}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Technician Dispatch -->
+          <div class="card">
+            <div class="card-header">
+              <div><div class="card-title">👨‍🔧 Technician Dispatch</div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;">Daily assignments</div></div>
+            </div>
+            <div class="dispatch-list">
+              ${techsWithJobs.map(t => `
+                <div class="dispatch-card">
+                  <div class="dispatch-avatar">${t.name?.charAt(0) || 'T'}</div>
+                  <div class="dispatch-info">
+                    <div class="dispatch-name">${t.name}</div>
+                    <div class="dispatch-role">${t.role || 'Technician'}</div>
+                  </div>
+                  <div class="dispatch-count">${t.activeJobs} Jobs</div>
+                </div>
+              `).join('')}
+              ${techs.length === 0 ? '<div class="empty">No technicians added yet</div>' : ''}
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-grid">
+          <!-- AMC Contracts -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📑 AMC Contracts</div>
+              <button class="btn-outline" onclick="showAddAmcModal()">+ Add AMC</button>
+            </div>
+            <div class="amc-list">
+              ${amcs.slice(0,3).map(a => `
+                <div class="amc-item">
+                  <div>
+                    <div class="amc-client">${a.client_name}</div>
+                    <div class="amc-expiry">Expiry: ${a.expiry || 'N/A'}</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div class="amc-visits">${a.visits_per_year || 4} / Year</div>
+                    <span class="badge badge-active">${a.status || 'Active'}</span>
+                  </div>
+                </div>
+              `).join('')}
+              ${amcs.length === 0 ? '<div class="empty">No AMC contracts yet</div>' : ''}
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">⚡ Quick Actions</div>
+            </div>
+            <div class="actions-grid">
+              <button class="action-btn" onclick="showAddQuotationModal()"><div class="action-btn-title">📄 Create Quotation</div><div class="action-btn-sub">Generate estimate</div></button>
+              <button class="action-btn" onclick="alert('Reassign technician - Go to Tasks page')"><div class="action-btn-title">🔄 Reassign Technician</div><div class="action-btn-sub">Dispatch field staff</div></button>
+              <button class="action-btn" onclick="alert('Inventory usage tracking - Coming soon')"><div class="action-btn-title">📦 Inventory Usage</div><div class="action-btn-sub">Track spare parts</div></button>
+              <button class="action-btn" onclick="showAddInvoiceModal()"><div class="action-btn-title">💰 Generate Invoice</div><div class="action-btn-sub">VAT enabled PDF</div></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Management Dashboard KPI -->
+        <div class="dashboard-banner">
+          <div class="card-header">
+            <div class="card-title">📊 Management Dashboard</div>
+            <button class="btn-outline" onclick="alert('Export report - Coming soon')">📎 Export Report</button>
+          </div>
+          <div class="kpi-grid">
+            <div class="kpi-item"><div class="kpi-label">Customer Satisfaction</div><div class="kpi-value">92%</div></div>
+            <div class="kpi-item"><div class="kpi-label">Monthly Collection</div><div class="kpi-value">${sym} ${totalRevenue.toLocaleString()}</div></div>
+            <div class="kpi-item"><div class="kpi-label">Pending Invoices</div><div class="kpi-value">${pendingInvoices}</div></div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // ==================== CUSTOMERS PAGE ====================
+    else if (currentPage === 'customers') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><div class="card-title">👥 All Customers</div><button class="btn-primary" onclick="showAddCustomerModal()">+ Add Customer</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Name</th><th>Contact</th><th>Email</th><th>Address</th><th>Currency</th><th>Sites</th><th>Actions</th></tr></thead><tbody>
+          ${clients.map(c => `<tr><td><strong>${c.name}</strong></td><td>${c.contact || '-'}</td><td>${c.email || '-'}</td><td>${c.address || '-'}</td><td>${c.currency || 'AED'}</td><td><button class="btn-sm" onclick="viewCustomerSites('${c.id}')">${sites.filter(s=>s.customer_id===c.id).length} sites</button></td><td class="action-buttons"><button class="btn-sm" onclick="deleteCustomer('${c.id}')">Delete</button></td></tr>`).join('')}
+          ${clients.length === 0 ? '<tr><td colspan="7" class="empty">No customers yet</td></tr>' : ''}
+        </tbody></table></div></div>
+      `;
+    }
+    
+    // ==================== SITES PAGE ====================
+    else if (currentPage === 'sites') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><div class="card-title">📍 All Sites</div><button class="btn-primary" onclick="showAddSiteModal()">+ Add Site</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Site Name</th><th>Customer</th><th>Address</th><th>Contact Person</th><th>Phone</th><th>Actions</th></tr></thead><tbody>
+          ${sites.map(s => { const c = clients.find(c => c.id === s.customer_id); return `<tr><td><strong>${s.name}</strong></td><td>${c ? c.name : '-'}</td><td>${s.address || '-'}</td><td>${s.contact_person || '-'}</td><td>${s.phone || '-'}</td><td class="action-buttons"><button class="btn-sm" onclick="deleteSite('${s.id}')">Delete</button></td></tr>`; }).join('')}
+          ${sites.length === 0 ? '<tr><td colspan="6" class="empty">No sites yet</td></tr>' : ''}
+        </tbody></table></div></div>
+      `;
+    }
+    
+    // ==================== INVOICES PAGE ====================
+    else if (currentPage === 'invoices') {
+      container.innerHTML = `
+        <div class="stats-grid"><div class="stat-card"><div class="stat-label">Total Invoices</div><div class="stat-value">${invoices.length}</div></div>
+        <div class="stat-card"><div class="stat-label">Total Amount</div><div class="stat-value">${sym} ${totalRevenue.toLocaleString()}</div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title">🧾 All Invoices</div><button class="btn-primary" onclick="showAddInvoiceModal()">+ Create Invoice</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Invoice #</th><th>Client</th><th>Description</th><th>Amount</th><th>Date</th><th>Status</th><th>PDF</th></tr></thead><tbody>
+          ${invoices.map(i => `<tr><td>${i.invoice_number || 'INV-' + i.id}</td><td>${i.client_name || '-'}</td><td>${i.description || '-'}</td><td>${sym} ${i.amount || 0}</td><td>${i.date || '-'}</td><td><span class="badge badge-active">${i.status || 'Pending'}</span></td><td><button class="btn-sm" onclick='generatePDFInvoice("${i.client_name}", "${i.description || 'Service'}", ${i.amount || 0})'>PDF</button></td></tr>`).join('')}
+          ${invoices.length === 0 ? '<tr><td colspan="7" class="empty">No invoices yet</td></tr>' : ''}
+        </tbody></table></div></div>
+      `;
+    }
+    
+    // ==================== TECHNICIANS PAGE ====================
+    else if (currentPage === 'technicians') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><div class="card-title">🔧 All Technicians</div><button class="btn-primary" onclick="showAddTechnicianModal()">+ Add Technician</button></div>
+        <div class="table-responsive"><tr><thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+          ${techs.map(t => `<tr><td><strong>${t.name}</strong></td><td>${t.role || '-'}</td><td>${t.email || '-'}</td><td>${t.phone || '-'}</td><td><span class="badge badge-active">${t.active ? 'Active' : 'Inactive'}</span></td><td><button class="btn-sm" onclick="deleteTechnician('${t.id}')">Delete</button></td></tr>`).join('')}
+          ${techs.length === 0 ? '<tr><td colspan="6" class="empty">No technicians yet</td></tr>' : ''}
+        </tbody></table></div></div>
+      `;
+    }
+    
+    // ==================== AMC PAGE ====================
+    else if (currentPage === 'amc') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><div class="card-title">📑 AMC Contracts</div><button class="btn-primary" onclick="showAddAmcModal()">+ Add Contract</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Client</th><th>Visits/Year</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+          ${amcs.map(a => `<tr><td><strong>${a.client_name}</strong></td><td>${a.visits_per_year || 4}</td><td>${a.expiry || '-'}</td><td><span class="badge badge-active">${a.status || 'Active'}</span></td><td><button class="btn-sm" onclick="deleteAmc('${a.id}')">Delete</button></td></tr>`).join('')}
+          ${amcs.length === 0 ? '<tr><td colspan="5" class="empty">No AMC contracts yet</td></tr>' : ''}
+        </tbody></table></div></div>
+      `;
+    }
+    
+    // ==================== TASKS PAGE ====================
+    else if (currentPage === 'tasks') {
+      container.innerHTML = `
+        <div class="stats-grid"><div class="stat-card"><div class="stat-label">Total Tasks</div><div class="stat-value">${jobs.length}</div></div>
+        <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value" style="color:var(--blue)">${jobs.filter(j => j.status === 'In Progress').length}</div></div>
+        <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value" style="color:var(--green)">${jobs.filter(j => j.status === 'Completed').length}</div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title">⚡ All Tasks</div><button class="btn-primary" onclick="showAddJobModal()">+ New Task</button></div>
+        <div class="table-responsive"><tr><thead><tr><th>Customer</th><th>Service</th><th>Technician</th><th>Priority</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+          ${jobs.map(j => `<tr><td>${j.customer_name || '-'}</td><td>${j.service || '-'}</td><td>${j.technician || '-'}</td><td><span class="priority-dot priority-${(j.priority || 'medium').toLowerCase()}">${j.priority || 'Medium'}</span></td><td><span class="badge ${j.status === 'Completed' ? 'badge-completed' : (j.status === 'In Progress' ? 'badge-progress' : 'badge-assigned')}">${j.status || 'Assigned'}</span></td><td><button class="btn-sm" onclick="updateJobStatus('${j.id}')">Update</button></td></tr>`).join('')}
+          ${jobs.length === 0 ? '<tr><td colspan="6" class="empty">No tasks yet</td></tr>' : ''}
+        </tbody></table></div></div>
+      `;
+    }
+    
+    // ==================== SERVICES PAGE ====================
+    else if (currentPage === 'services') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><div class="card-title">📋 Service Catalog</div><button class="btn-primary" onclick="showAddServiceModal()">+ Add Service</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Service Name</th><th>Actions</th></tr></thead><tbody>
+          ${services.map(s => `<tr><td>${s.name}</td><td><button class="btn-sm btn-danger" onclick="deleteService('${s.id}')">Delete</button></td></tr>`).join('')}
+          ${services.length === 0 ? '<tr><td colspan="2" class="empty">No services yet</td></tr>' : ''}
+        </tbody></table></div></div>
+      `;
+    }
+    
+    // ==================== ASSETS PAGE ====================
+    else if (currentPage === 'assets') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><div class="card-title">📦 Assets</div><button class="btn-primary" onclick="showAddAssetModal()">+ Add Asset</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Name</th><th>Type</th><th>Model</th><th>Serial #</th></tr></thead><tbody>
+          ${assets.map(a => `<tr><td><strong>${a.name}</strong></td><td>${a.asset_type || '-'}</td><td>${a.model || '-'}</td><td>${a.serial_number || '-'}</td></tr>`).join('')}
+          ${assets.length === 0 ? '<tr><td colspan="4" class="empty">No assets yet</td></tr>' : ''}
+        </tbody></table></div></div>
+      `;
+    }
+    
+    // ==================== QUOTATIONS PAGE ====================
+    else if (currentPage === 'quotations') {
+      container.innerHTML = `
+        <div class="card"><div class="card-header"><div class="card-title">📝 Quotations</div><button class="btn-primary" onclick="showAddQuotationModal()">+ New Quotation</button></div>
+        <div class="table-responsive"><table><thead><tr><th>Quote #</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th></tr></thead><tbody>
+          ${quotations.map(q => `<tr><td>${q.quote_number || 'N/A'}</td><td>${q.client_name || '-'}</td><td>${q.date || '-'}</td><td>${sym} ${(q.total || 0).toLocaleString()}</td><td><span class="badge badge-pending">${q.status || 'Draft'}</span></td></tr>`).join('')}
+          ${quotations.length === 0 ? '<tr><td colspan="5" class="empty">No quotations yet</td></tr>' : ''}
+        </tbody></table></div></div>
+      `;
+    }
+  }
+
+  // ==================== MODAL FUNCTIONS ====================
+  
+  window.showAddCustomerModal = async () => {
+    const modal = document.createElement('div'); modal.className = 'modal';
+    modal.innerHTML = `<div class="modal-content"><h3>➕ Add New Customer</h3><label>Customer Name *</label><input type="text" id="custName" placeholder="e.g., Al Noor Villa"><label>Contact Person</label><input type="text" id="custContact" placeholder="e.g., Ahmed"><label>Email</label><input type="email" id="custEmail" placeholder="email@example.com"><label>Phone</label><input type="text" id="custPhone" placeholder="+971 50 123 4567"><label>Address</label><textarea id="custAddress" rows="2" placeholder="Full address"></textarea><label>Currency</label><select id="custCurrency"><option value="AED">AED - UAE Dirham</option><option value="EUR">EUR - Euro</option></select><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Save Customer</button></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('cancelBtn').onclick = () => modal.remove();
+    document.getElementById('saveBtn').onclick = async () => {
+      const name = document.getElementById('custName').value;
+      if (!name) { alert('Customer name required'); return; }
+      await fetchAPI('/clients', { method: 'POST', body: JSON.stringify({ name, contact: document.getElementById('custContact').value, email: document.getElementById('custEmail').value, phone: document.getElementById('custPhone').value, address: document.getElementById('custAddress').value, currency: document.getElementById('custCurrency').value }) });
+      modal.remove(); renderApp();
+    };
+  };
+
+  window.showAddSiteModal = async () => {
+    const clients = await fetchAPI('/clients');
+    const modal = document.createElement('div'); modal.className = 'modal';
+    modal.innerHTML = `<div class="modal-content"><h3>📍 Add New Site</h3><label>Customer *</label><select id="siteCustomerId">${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select><label>Site Name *</label><input type="text" id="siteName" placeholder="e.g., Main Office, Warehouse A"><label>Address</label><textarea id="siteAddress" rows="2" placeholder="Site address"></textarea><label>Contact Person</label><input type="text" id="siteContact" placeholder="Site contact name"><label>Phone</label><input type="text" id="sitePhone" placeholder="Site phone number"><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Save Site</button></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('cancelBtn').onclick = () => modal.remove();
+    document.getElementById('saveBtn').onclick = async () => {
+      const customer_id = document.getElementById('siteCustomerId').value;
+      const name = document.getElementById('siteName').value;
+      if (!name) { alert('Site name required'); return; }
+      await fetchAPI('/sites', { method: 'POST', body: JSON.stringify({ customer_id, name, address: document.getElementById('siteAddress').value, contact_person: document.getElementById('siteContact').value, phone: document.getElementById('sitePhone').value }) });
+      modal.remove(); renderApp();
+    };
+  };
+
+  window.showAddJobModal = async () => {
+    const clients = await fetchAPI('/clients');
+    const techs = await fetchAPI('/technicians');
+    const sites = await fetchAPI('/sites');
+    const services = await fetchAPI('/services');
+    const modal = document.createElement('div'); modal.className = 'modal';
+    modal.innerHTML = `<div class="modal-content"><h3>➕ Create New Job</h3><label>Customer *</label><select id="jobCustomerId">${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select><label>Site</label><select id="jobSiteId"><option value="">None</option></select><label>Service *</label><input type="text" id="jobService" list="serviceList" placeholder="e.g., AC Maintenance"><datalist id="serviceList">${services.map(s => `<option value="${s.name}">`).join('')}</datalist><label>Technician</label><select id="jobTechnician"><option value="">Unassigned</option>${techs.map(t => `<option value="${t.name}">${t.name}</option>`).join('')}</select><label>Priority</label><select id="jobPriority"><option>High</option><option selected>Medium</option><option>Low</option></select><label>Status</label><select id="jobStatus"><option>Assigned</option><option>In Progress</option><option>Completed</option></select><label>Description</label><textarea id="jobDesc" rows="2" placeholder="Job details..."></textarea><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Create Job</button></div></div>`;
+    document.body.appendChild(modal);
+    const customerSelect = document.getElementById('jobCustomerId');
+    const siteSelect = document.getElementById('jobSiteId');
+    customerSelect.onchange = () => { const filtered = sites.filter(s => s.customer_id === customerSelect.value); siteSelect.innerHTML = '<option value="">None</option>' + filtered.map(s => `<option value="${s.id}">${s.name}</option>`).join(''); };
+    customerSelect.onchange();
+    document.getElementById('cancelBtn').onclick = () => modal.remove();
+    document.getElementById('saveBtn').onclick = async () => {
+      const customerId = customerSelect.value;
+      const customerName = customerSelect.options[customerSelect.selectedIndex]?.text;
+      const service = document.getElementById('jobService').value;
+      if (!customerId || !service) { alert('Customer and Service required'); return; }
+      await fetchAPI('/jobs', { method: 'POST', body: JSON.stringify({ customerId, customerName, site_id: document.getElementById('jobSiteId').value || null, service, technician: document.getElementById('jobTechnician').value || null, priority: document.getElementById('jobPriority').value, status: document.getElementById('jobStatus').value, description: document.getElementById('jobDesc').value }) });
+      modal.remove(); renderApp();
+    };
+  };
+
+  window.showAddInvoiceModal = async () => {
+    const clients = await fetchAPI('/clients');
+    const modal = document.createElement('div'); modal.className = 'modal';
+    modal.innerHTML = `<div class="modal-content"><h3>🧾 Create New Invoice</h3><label>Client Name *</label><select id="invClientId">${clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('')}</select><label>Description</label><input type="text" id="invDesc" placeholder="Service description"><label>Amount *</label><input type="number" id="invAmount" step="0.01" placeholder="0.00"><label>Issue Date</label><input type="date" id="invDate" value="${new Date().toISOString().slice(0,10)}"><label>Due Date</label><input type="date" id="invDueDate"><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Create Invoice</button></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('cancelBtn').onclick = () => modal.remove();
+    document.getElementById('saveBtn').onclick = async () => {
+      const client_name = document.getElementById('invClientId').value;
+      const amount = parseFloat(document.getElementById('invAmount').value);
+      if (!client_name || !amount) { alert('Client and Amount required'); return; }
+      await fetchAPI('/invoices', { method: 'POST', body: JSON.stringify({ client_name, description: document.getElementById('invDesc').value, amount, date: document.getElementById('invDate').value, due_date: document.getElementById('invDueDate').value, status: 'Pending' }) });
+      modal.remove(); renderApp();
+    };
+  };
+
+  window.showAddTechnicianModal = async () => {
+    const modal = document.createElement('div'); modal.className = 'modal';
+    modal.innerHTML = `<div class="modal-content"><h3>🔧 Add Technician</h3><label>Full Name *</label><input type="text" id="techName" placeholder="e.g., Ahmed K."><label>Role / Specialization</label><input type="text" id="techRole" placeholder="e.g., HVAC Specialist"><label>Email</label><input type="email" id="techEmail" placeholder="tech@company.com"><label>Phone</label><input type="text" id="techPhone" placeholder="+971 50 123 4567"><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Save Technician</button></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('cancelBtn').onclick = () => modal.remove();
+    document.getElementById('saveBtn').onclick = async () => {
+      const name = document.getElementById('techName').value;
+      if (!name) { alert('Technician name required'); return; }
+      await fetchAPI('/technicians', { method: 'POST', body: JSON.stringify({ name, role: document.getElementById('techRole').value, email: document.getElementById('techEmail').value, phone: document.getElementById('techPhone').value, active: true }) });
+      modal.remove(); renderApp();
+    };
+  };
+
+  window.showAddAmcModal = async () => {
+    const clients = await fetchAPI('/clients');
+    const sites = await fetchAPI('/sites');
+    const modal = document.createElement('div'); modal.className = 'modal';
+    modal.innerHTML = `<div class="modal-content"><h3>📑 New AMC Contract</h3><label>Client *</label><select id="amcClientId">${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select><label>Site</label><select id="amcSiteId"><option value="">None</option></select><label>Visits per Year</label><input type="number" id="amcVisits" value="4"><label>Start Date</label><input type="date" id="amcStart" value="${new Date().toISOString().slice(0,10)}"><label>Expiry Date *</label><input type="date" id="amcExpiry"><label>Contract Value (Optional)</label><input type="number" id="amcValue" step="0.01"><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Create Contract</button></div></div>`;
+    document.body.appendChild(modal);
+    const clientSelect = document.getElementById('amcClientId');
+    const siteSelect = document.getElementById('amcSiteId');
+    clientSelect.onchange = () => { const filtered = sites.filter(s => s.customer_id === clientSelect.value); siteSelect.innerHTML = '<option value="">None</option>' + filtered.map(s => `<option value="${s.id}">${s.name}</option>`).join(''); };
+    document.getElementById('cancelBtn').onclick = () => modal.remove();
+    document.getElementById('saveBtn').onclick = async () => {
+      const clientId = clientSelect.value;
+      const clientName = clientSelect.options[clientSelect.selectedIndex]?.text;
+      const expiry = document.getElementById('amcExpiry').value;
+      if (!clientId || !expiry) { alert('Client and Expiry date required'); return; }
+      await fetchAPI('/amcs', { method: 'POST', body: JSON.stringify({ clientId, clientName, site_id: document.getElementById('amcSiteId').value || null, visits_per_year: parseInt(document.getElementById('amcVisits').value), start_date: document.getElementById('amcStart').value, expiry, status: 'Active', contract_value: parseFloat(document.getElementById('amcValue').value) || null }) });
+      modal.remove(); renderApp();
+    };
+  };
+
+  window.showAddServiceModal = async () => {
+    const name = prompt('Enter service name:');
+    if (name) await fetchAPI('/services', { method: 'POST', body: JSON.stringify({ name }) });
+    renderApp();
+  };
+
+  window.showAddAssetModal = async () => {
+    const name = prompt('Asset name:'); if (!name) return;
+    const asset_type = prompt('Asset type (AC, Generator, Pump, etc.):');
+    await fetchAPI('/assets', { method: 'POST', body: JSON.stringify({ name, asset_type }) });
+    renderApp();
+  };
+
+  window.showAddQuotationModal = async () => {
+    const clients = await fetchAPI('/clients');
+    const client_id = prompt(`Client ID (${clients.map(c => c.id).join(', ')}):`);
+    if (client_id) await fetchAPI('/quotations', { method: 'POST', body: JSON.stringify({ client_id, date: new Date().toISOString().slice(0,10), line_items: [] }) });
+    renderApp();
+  };
+
+  window.updateJobStatus = async (id) => {
+    const newStatus = prompt('Update status (Assigned / In Progress / Completed):', 'In Progress');
+    if (newStatus) await fetchAPI(`/jobs/${id}`, { method: 'PUT', body: JSON.stringify({ status: newStatus }) });
+    renderApp();
+  };
+
+  window.deleteCustomer = async (id) => { if (confirm('Delete this customer?')) { await fetchAPI(`/clients/${id}`, { method: 'DELETE' }); renderApp(); } };
+  window.deleteSite = async (id) => { if (confirm('Delete this site?')) { await fetchAPI(`/sites/${id}`, { method: 'DELETE' }); renderApp(); } };
+  window.deleteTechnician = async (id) => { if (confirm('Delete this technician?')) { await fetchAPI(`/technicians/${id}`, { method: 'DELETE' }); renderApp(); } };
+  window.deleteService = async (id) => { if (confirm('Delete this service?')) { await fetchAPI(`/services/${id}`, { method: 'DELETE' }); renderApp(); } };
+  window.deleteAmc = async (id) => { if (confirm('Delete this AMC contract?')) { await fetchAPI(`/amcs/${id}`, { method: 'DELETE' }); renderApp(); } };
+  window.viewCustomerSites = (id) => { renderApp(); };
+
+  window.toggleSidebar = toggleSidebar;
+  window.closeSidebar = closeSidebar;
+  window.login = login;
+  window.signup = signup;
+  window.demoLogin = demoLogin;
+  window.logout = logout;
+  window.toggleForm = toggleForm;
+  window.generatePDFInvoice = generatePDFInvoice;
+
+  renderApp();
+</script>
+</body>
+</html>
