@@ -4,11 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>MaintenanceFlow PRO | Live Maintenance Ops</title>
+  
+  <!-- Google Fonts: Syne (headings) + Inter (numbers) + DM Sans (body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -42,7 +46,350 @@
       min-height: 100vh;
     }
 
-    /* Login */
+    /* ============================================================
+       FIX #1: NUMBERS FONT (Inter) + Right-Aligned Currency
+       ============================================================ */
+    .stat-value,
+    .kpi-value,
+    .contract-value,
+    .amount,
+    .cstat-value,
+    .bar-amount,
+    .line-item-total,
+    .totals-row span:last-child {
+      font-family: 'Inter', 'DM Sans', sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      font-feature-settings: "tnum" on;
+    }
+
+    td.amount-cell,
+    th.amount-cell {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ============================================================
+       FIX #2: SVG ICONS (Replaces Emojis)
+       ============================================================ */
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .icon svg {
+      width: 100%;
+      height: 100%;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .icon-filled svg {
+      fill: currentColor;
+      stroke: none;
+    }
+
+    .nav-item .icon { color: rgba(255,255,255,0.7); }
+    .nav-item.active .icon { color: white; }
+    .nav-item:hover .icon { color: white; }
+
+    .btn-primary .icon,
+    .btn-sm-primary .icon { color: white; }
+    .btn-secondary .icon { color: var(--text-muted); }
+
+    /* ============================================================
+       FIX #3: SIDEBAR LOGO (Branding)
+       ============================================================ */
+    .sidebar-logo {
+      padding: 28px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .sidebar-logo .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: var(--accent);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .sidebar-logo .logo-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: white;
+      stroke-width: 2;
+      fill: none;
+    }
+    .sidebar-logo .logo-text h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      color: white;
+      line-height: 1.2;
+    }
+    .sidebar-logo .logo-text h2 span { color: var(--accent); }
+    .sidebar-logo .logo-text p {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       FIX #4: RESPONSIVE LAYOUT - Better Grid Breakpoints
+       ============================================================ */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .contracts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .customers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* ============================================================
+       FIX #5: MOBILE RESPONSIVE BREAKPOINTS
+       ============================================================ */
+    @media (max-width: 1024px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .bottom-grid { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        width: 280px;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .main-content {
+        margin-left: 0;
+        padding: 70px 12px 16px 12px;
+      }
+      .mobile-menu-btn { display: block; }
+      .sidebar-overlay.open { display: block; }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .stat-value { font-size: 1.6rem; }
+
+      .contracts-grid,
+      .customers-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .actions-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px;
+      }
+      .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+      .header-actions .btn-primary,
+      .header-actions .btn-secondary {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+        font-size: 0.8rem;
+        padding: 8px 12px;
+      }
+
+      .filters-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .filter-input,
+      .filter-select {
+        width: 100%;
+        min-width: unset;
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      table {
+        min-width: 500px;
+        font-size: 0.75rem;
+      }
+
+      .modal-content {
+        padding: 16px;
+        width: 95%;
+        margin: 20px auto;
+      }
+
+      .line-items-header,
+      .line-item-row {
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 8px;
+        font-size: 0.7rem;
+      }
+      .line-items-header span:nth-child(4),
+      .line-items-header span:nth-child(5),
+      .line-item-row .line-item-total,
+      .line-item-row .btn-remove {
+        display: none;
+      }
+
+      .customer-info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .contract-details {
+        grid-template-columns: 1fr;
+      }
+
+      .contract-footer {
+        flex-wrap: wrap;
+      }
+      .contract-footer .btn-sm {
+        flex: 1 1 calc(50% - 4px);
+        min-width: 80px;
+      }
+
+      .customer-footer {
+        flex-wrap: wrap;
+      }
+      .customer-footer .btn-sm {
+        flex: 1 1 calc(50% - 4px);
+        min-width: 70px;
+        font-size: 0.65rem;
+        padding: 6px 8px;
+      }
+
+      .visit-item {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .visit-date {
+        min-width: 44px;
+        padding: 6px 10px;
+      }
+      .visit-date-day { font-size: 0.9rem; }
+      .visit-tech { font-size: 0.6rem; padding: 2px 8px; }
+
+      .dispatch-card {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .amc-item {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .toast {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+        max-width: unset;
+        font-size: 0.8rem;
+        padding: 12px 16px;
+      }
+
+      .chart-bars {
+        gap: 6px;
+        height: 120px;
+      }
+      .bar-amount { font-size: 0.55rem; }
+      .bar-label { font-size: 0.6rem; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .stat-card { padding: 14px; }
+      .stat-value { font-size: 1.3rem; }
+      .stat-label { font-size: 0.6rem; }
+
+      .header h1 { font-size: 1.1rem; }
+      .header-icon { width: 36px; height: 36px; }
+      .header-icon svg { width: 18px; height: 18px; }
+
+      .card { padding: 14px; }
+      .card-title { font-size: 0.85rem; }
+
+      .sidebar { width: 260px; }
+      .sidebar-logo { padding: 20px 16px; }
+      .sidebar-logo .logo-icon { width: 34px; height: 34px; }
+      .sidebar-logo .logo-text h2 { font-size: 1rem; }
+      .nav-item { padding: 10px 16px; font-size: 0.8rem; gap: 10px; }
+
+      .modal-content { padding: 14px; }
+      .modal-content h3 { font-size: 1.1rem; }
+    }
+
+    /* ============================================================
+       EXISTING STYLES (Kept as-is)
+       ============================================================ */
     .login-container { max-width: 420px; margin: 100px auto; background: var(--surface); padding: 40px; border-radius: var(--radius); box-shadow: var(--shadow-md); text-align: center; border: 1px solid var(--border); }
     .login-container h2 { font-family: 'Syne', sans-serif; font-size: 1.8rem; margin-bottom: 10px; }
     .login-container h2 span { color: var(--accent); }
@@ -58,21 +405,15 @@
     .divider::before { left: 0; }
     .divider::after { right: 0; }
 
-    /* Dashboard Layout - Left Align Menu */
     .app-container { display: flex; min-height: 100vh; }
     .sidebar { width: 280px; background: var(--text); color: white; position: fixed; height: 100vh; overflow-y: auto; left: 0; top: 0; z-index: 100; }
-    .sidebar-logo { padding: 28px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
-    .sidebar-logo h2 { font-family: 'Syne', sans-serif; font-size: 1.4rem; color: white; }
-    .sidebar-logo span { color: var(--accent); }
-    .sidebar-logo p { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 6px; }
     .nav-item { display: flex; align-items: center; gap: 14px; padding: 12px 24px; cursor: pointer; color: rgba(255,255,255,0.7); transition: all 0.2s; font-size: 0.9rem; }
     .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
     .nav-item.active { background: var(--accent); color: white; }
-    .nav-item span:first-child { font-size: 1.2rem; }
+    .nav-item span:last-child { font-size: 0.9rem; }
 
     .main-content { flex: 1; margin-left: 280px; padding: 24px 32px; }
     
-    /* Header */
     .header { background: var(--surface); border-radius: var(--radius); padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; border: 1px solid var(--border); box-shadow: var(--shadow); flex-wrap: wrap; gap: 16px; }
     .header-brand { display: flex; align-items: center; gap: 16px; }
     .header-icon { width: 48px; height: 48px; background: var(--text); border-radius: 14px; display: flex; align-items: center; justify-content: center; }
@@ -80,20 +421,17 @@
     .header h1 { font-family: 'Syne', sans-serif; font-size: 1.55rem; font-weight: 800; letter-spacing: -0.02em; }
     .header h1 span { color: var(--accent); }
     .header p { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
-    .header-actions { display: flex; gap: 12px; flex-wrap: wrap; }
-    .user-info { display: flex; align-items: center; gap: 16px; }
+    .header-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .user-info { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
     
-    /* Buttons */
-    .btn-primary { background: var(--text); color: white; border: none; padding: 10px 20px; border-radius: var(--radius-sm); font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+    .btn-primary { background: var(--text); color: white; border: none; padding: 10px 20px; border-radius: var(--radius-sm); font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
     .btn-primary:hover { background: var(--accent); transform: translateY(-1px); }
-    .btn-secondary { background: transparent; border: 1.5px solid var(--border); padding: 10px 20px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; background: white; }
+    .btn-secondary { background: transparent; border: 1.5px solid var(--border); padding: 10px 20px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; background: white; display: inline-flex; align-items: center; gap: 6px; }
     .btn-secondary:hover { border-color: var(--text-muted); background: var(--surface-2); }
-    .btn-outline { background: transparent; border: 1.5px solid var(--border); padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.8rem; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; }
     .logout-btn { background: transparent; border: 1.5px solid var(--border); padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; }
     .logout-btn:hover { background: var(--surface-2); }
     
-    /* Stats Cards - Fixed Alignment */
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px; }
     .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); position: relative; transition: all 0.2s; }
     .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 3px 3px 0 0; }
     .stat-card.total::before { background: var(--text); }
@@ -101,28 +439,24 @@
     .stat-card.expiring::before { background: var(--amber); }
     .stat-card.expired::before { background: var(--red); }
     .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 600; }
-    .stat-value { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; margin-top: 10px; letter-spacing: -0.03em; }
+    .stat-value { font-size: 2.2rem; margin-top: 10px; letter-spacing: -0.03em; }
     .stat-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 5px; }
     
-    /* Alert Banner */
-    .alert-banner { background: var(--amber-light); border: 1.5px solid #fcd34d; border-radius: 14px; padding: 14px 20px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .alert-banner { background: var(--amber-light); border: 1.5px solid #fcd34d; border-radius: 14px; padding: 14px 20px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
     .alert-text { flex: 1; font-size: 0.85rem; color: var(--amber); font-weight: 500; }
     .alert-action { font-size: 0.78rem; text-decoration: underline; cursor: pointer; white-space: nowrap; color: var(--amber); }
     
-    /* Filters */
     .filters-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 24px; }
-    .filter-group { display: flex; flex-direction: column; gap: 5px; }
+    .filter-group { display: flex; flex-direction: column; gap: 5px; flex: 1 1 160px; min-width: 120px; }
     .filter-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); font-weight: 600; }
-    .filter-input { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 0.85rem; font-family: inherit; background: var(--surface); outline: none; min-width: 160px; }
-    .filter-select { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 0.85rem; font-family: inherit; background: var(--surface); cursor: pointer; }
+    .filter-input { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 0.85rem; font-family: inherit; background: var(--surface); outline: none; width: 100%; }
+    .filter-select { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 0.85rem; font-family: inherit; background: var(--surface); cursor: pointer; width: 100%; }
     
-    /* Card Grid */
-    .contracts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; margin-bottom: 28px; }
     .contract-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 20px; padding: 20px; transition: all 0.2s; cursor: pointer; }
     .contract-card:hover { box-shadow: var(--shadow-md); border-color: var(--text-muted); }
     .contract-card.expiring { border-color: #fcd34d; background: #fffdf5; }
     .contract-card.expired { border-color: #fca5a5; background: #fff8f8; }
-    .contract-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    .contract-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
     .contract-client { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
     .contract-type { font-size: 0.7rem; color: var(--text-muted); margin-top: 3px; }
     .contract-details { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
@@ -135,124 +469,104 @@
     .progress-fill.green { background: var(--green); }
     .progress-fill.amber { background: var(--amber); }
     .progress-fill.red { background: var(--red); }
-    .contract-footer { display: flex; gap: 8px; padding-top: 14px; border-top: 1px solid var(--border); }
-    .btn-sm { flex: 1; padding: 8px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .contract-footer { display: flex; gap: 8px; padding-top: 14px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+    .btn-sm { flex: 1; padding: 8px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 60px; }
     .btn-sm-primary { background: var(--text); color: white; border: none; }
     .btn-sm-primary:hover { background: var(--accent); }
     .btn-sm-ghost { background: transparent; border: 1.5px solid var(--border); }
     .btn-sm-ghost:hover { border-color: var(--accent); background: var(--surface-2); }
     .btn-sm-warning { background: var(--amber-light); color: var(--amber); border: 1.5px solid #fcd34d; }
     .btn-sm-warning:hover { background: var(--amber); color: white; }
+    .btn-sm-danger { background: var(--red); color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
     
-    /* Badges */
     .badge { display: inline-block; font-size: 0.7rem; font-weight: 500; padding: 4px 12px; border-radius: 100px; }
     .badge-active { background: var(--green-light); color: var(--green); }
     .badge-expiring { background: var(--amber-light); color: var(--amber); }
     .badge-expired { background: var(--red-light); color: var(--red); }
     
-    /* Customer Card Specific */
-    .customers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; margin-bottom: 28px; }
     .customer-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 20px; padding: 22px 24px; transition: all 0.2s; }
     .customer-card:hover { box-shadow: var(--shadow-md); border-color: var(--text-muted); }
-    .customer-top { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
-    .customer-avatar { width: 48px; height: 48px; background: var(--surface-2); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: var(--text); border: 1.5px solid var(--border); }
-    .customer-name-section { flex: 1; }
+    .customer-top { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+    .customer-avatar { width: 48px; height: 48px; background: var(--surface-2); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: var(--text); border: 1.5px solid var(--border); flex-shrink: 0; }
+    .customer-name-section { flex: 1; min-width: 100px; }
     .customer-name { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
     .customer-type { font-size: 0.7rem; color: var(--text-muted); margin-top: 3px; }
     .customer-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
     .info-item .info-label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
-    .info-item .info-value { font-size: 0.85rem; font-weight: 500; margin-top: 3px; }
-    .customer-stats { display: flex; gap: 8px; margin-bottom: 16px; }
-    .cstat { flex: 1; background: var(--surface-2); border-radius: 10px; padding: 10px; text-align: center; }
-    .cstat-value { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; }
+    .info-item .info-value { font-size: 0.85rem; font-weight: 500; margin-top: 3px; word-break: break-word; }
+    .customer-stats { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .cstat { flex: 1; background: var(--surface-2); border-radius: 10px; padding: 10px; text-align: center; min-width: 60px; }
+    .cstat-value { font-size: 1rem; font-weight: 800; }
     .cstat-label { font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); margin-top: 3px; }
-    .customer-footer { display: flex; gap: 8px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .customer-footer { display: flex; gap: 8px; padding-top: 14px; border-top: 1px solid var(--border); flex-wrap: wrap; }
     
-    /* Main Grid (2 columns) - Fixed Alignment */
-    .main-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; margin-bottom: 28px; }
-    
-    /* Cards */
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
     .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-    .card-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+    .card-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
     
-    /* Tables */
-    .table-responsive { overflow-x: auto; }
+    .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table { width: 100%; border-collapse: collapse; }
-    thead th { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); padding-bottom: 12px; border-bottom: 1px solid var(--border); text-align: left; letter-spacing: 0.5px; }
-    tbody td { padding: 14px 0; font-size: 0.85rem; border-bottom: 1px solid var(--surface-2); vertical-align: middle; }
+    thead th { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); padding: 10px 8px 12px 8px; border-bottom: 1px solid var(--border); text-align: left; letter-spacing: 0.5px; }
+    tbody td { padding: 12px 8px; font-size: 0.85rem; border-bottom: 1px solid var(--surface-2); vertical-align: middle; }
     tbody tr:hover { background: var(--surface-2); }
     
-    /* Priority */
     .priority-dot { display: inline-flex; align-items: center; gap: 6px; }
-    .priority-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; }
+    .priority-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .priority-high::before { background: var(--accent); }
     .priority-medium::before { background: var(--amber); }
     .priority-low::before { background: var(--green); }
     
-    /* Dispatch Cards */
     .dispatch-list { display: flex; flex-direction: column; gap: 12px; }
-    .dispatch-card { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px; display: flex; align-items: center; gap: 12px; transition: all 0.2s; }
+    .dispatch-card { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px; display: flex; align-items: center; gap: 12px; transition: all 0.2s; flex-wrap: wrap; }
     .dispatch-card:hover { background: var(--surface-2); }
-    .dispatch-avatar { width: 44px; height: 44px; background: var(--surface-2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; color: var(--text); }
-    .dispatch-info { flex: 1; }
+    .dispatch-avatar { width: 44px; height: 44px; background: var(--surface-2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; color: var(--text); flex-shrink: 0; }
+    .dispatch-info { flex: 1; min-width: 80px; }
     .dispatch-name { font-size: 0.9rem; font-weight: 600; }
     .dispatch-role { font-size: 0.7rem; color: var(--text-muted); }
-    .dispatch-count { background: var(--accent-light); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; color: var(--accent); }
+    .dispatch-count { background: var(--accent-light); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; color: var(--accent); white-space: nowrap; }
     
-    /* Bottom Grid */
-    .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
     .amc-list { display: flex; flex-direction: column; gap: 12px; }
-    .amc-item { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
+    .amc-item { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; flex-wrap: wrap; gap: 8px; }
     .amc-item:hover { background: var(--surface-2); }
     .amc-client { font-weight: 600; font-size: 0.85rem; }
     .amc-expiry { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
     .amc-visits { font-size: 0.7rem; font-weight: 500; text-align: right; }
     
-    /* Quick Actions Grid */
-    .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .action-btn { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 18px; text-align: left; background: white; cursor: pointer; transition: all 0.2s; }
+    .action-btn { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 18px; text-align: left; background: white; cursor: pointer; transition: all 0.2s; width: 100%; display: flex; flex-direction: column; gap: 4px; }
     .action-btn:hover { border-color: var(--accent); background: var(--surface-2); transform: translateY(-2px); }
-    .action-btn-title { font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; }
+    .action-btn-title { font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
     .action-btn-sub { font-size: 0.7rem; color: var(--text-muted); }
     
-    /* KPI Dashboard */
     .dashboard-banner { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 28px; }
-    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; }
     .kpi-item { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 20px; text-align: center; }
     .kpi-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
-    .kpi-value { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-top: 8px; }
+    .kpi-value { font-size: 1.6rem; font-weight: 800; margin-top: 8px; }
     
-    /* Modal */
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
-    .modal-content { background: var(--surface); max-width: 700px; width: 90%; border-radius: var(--radius); padding: 28px; border: 1px solid var(--border); box-shadow: var(--shadow-md); max-height: 90vh; overflow-y: auto; }
-    .modal-content h3 { font-family: 'Syne', sans-serif; margin-bottom: 20px; font-size: 1.3rem; }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); padding: 16px; }
+    .modal-content { background: var(--surface); max-width: 700px; width: 100%; border-radius: var(--radius); padding: 28px; border: 1px solid var(--border); box-shadow: var(--shadow-md); max-height: 90vh; overflow-y: auto; }
+    .modal-content h3 { font-family: 'Syne', sans-serif; margin-bottom: 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
     .modal-content h4 { font-family: 'Syne', sans-serif; margin: 16px 0 12px 0; font-size: 1rem; }
     .modal-content label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
     .modal-content input, .modal-content select, .modal-content textarea { width: 100%; padding: 12px; margin-bottom: 16px; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; background: white; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
     
-    .btn-sm-danger { background: var(--red); color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 0.75rem; cursor: pointer; }
     .empty { text-align: center; padding: 40px; color: var(--text-muted); }
     .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
     
-    /* Mobile Menu */
     .mobile-menu-btn { display: none; position: fixed; top: 16px; left: 16px; z-index: 201; background: var(--text); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; }
     .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; }
     
-    /* Upcoming Visits Panel */
     .visits-list { display: flex; flex-direction: column; gap: 12px; }
-    .visit-item { display: flex; align-items: center; gap: 14px; padding: 12px; border: 1.5px solid var(--border); border-radius: 14px; transition: all 0.2s; }
+    .visit-item { display: flex; align-items: center; gap: 14px; padding: 12px; border: 1.5px solid var(--border); border-radius: 14px; transition: all 0.2s; flex-wrap: wrap; }
     .visit-item:hover { border-color: var(--text-muted); background: var(--surface-2); }
-    .visit-date { background: var(--text); color: var(--surface); border-radius: 10px; padding: 8px 12px; text-align: center; min-width: 52px; }
+    .visit-date { background: var(--text); color: var(--surface); border-radius: 10px; padding: 8px 12px; text-align: center; min-width: 52px; flex-shrink: 0; }
     .visit-date-day { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; line-height: 1; }
     .visit-date-month { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-top: 2px; }
-    .visit-info { flex: 1; }
+    .visit-info { flex: 1; min-width: 120px; }
     .visit-client { font-size: 0.85rem; font-weight: 600; }
     .visit-type { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
-    .visit-tech { background: var(--surface-2); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 500; }
+    .visit-tech { background: var(--surface-2); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 500; white-space: nowrap; }
     
-    /* Toast Notification */
     .toast {
       position: fixed;
       bottom: 30px;
@@ -269,81 +583,65 @@
       animation: slideIn 0.3s ease;
       max-width: 350px;
     }
-
     .toast.success { border-left-color: var(--green); }
     .toast.error { border-left-color: var(--red); }
     .toast.warning { border-left-color: var(--amber); }
     .toast.info { border-left-color: var(--blue); }
-
-    .toast-icon { font-size: 1.5rem; }
+    .toast-icon { font-size: 1.5rem; flex-shrink: 0; }
     .toast-content { flex: 1; }
     .toast-title { font-weight: 600; font-size: 0.9rem; }
     .toast-message { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
-    .toast-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted); padding: 0 4px; }
+    .toast-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted); padding: 0 4px; flex-shrink: 0; }
     .toast-close:hover { color: var(--text); }
 
     @keyframes slideIn {
       from { transform: translateX(100%); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
     }
-
     @keyframes slideOut {
       from { transform: translateX(0); opacity: 1; }
       to { transform: translateX(100%); opacity: 0; }
     }
     
-    /* Chart Bars */
     .chart-bars { display: flex; align-items: flex-end; gap: 16px; height: 160px; margin-top: 20px; }
     .bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
-    .bar { width: 100%; background: var(--surface-2); border-radius: 6px 6px 0 0; transition: background 0.2s; cursor: pointer; position: relative; }
+    .bar { width: 100%; background: var(--surface-2); border-radius: 6px 6px 0 0; transition: background 0.2s; cursor: pointer; position: relative; min-height: 8px; }
     .bar:hover { background: var(--accent-light); }
     .bar.highlight { background: var(--accent); }
     .bar-label { font-size: 0.7rem; color: var(--text-muted); }
     .bar-amount { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); }
     
-    /* Line Items for Invoice Modal */
     .line-items-header { display: grid; grid-template-columns: 3fr 1fr 1fr 1fr 40px; gap: 12px; padding: 10px 14px; background: var(--surface-2); border-radius: 10px; margin-bottom: 8px; }
     .line-items-header span { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; }
     .line-item-row { display: grid; grid-template-columns: 3fr 1fr 1fr 1fr 40px; gap: 12px; align-items: center; margin-bottom: 8px; }
     .line-item-row input { padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 0.85rem; font-family: inherit; background: var(--surface); outline: none; width: 100%; }
     .line-item-total { font-weight: 600; font-size: 0.88rem; text-align: right; }
-    .btn-remove { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; cursor: pointer; color: var(--red); font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+    .btn-remove { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; cursor: pointer; color: var(--red); font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .totals-box { margin-top: 16px; display: flex; justify-content: flex-end; }
-    .totals-inner { width: 280px; border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .totals-inner { width: 280px; border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden; max-width: 100%; }
     .totals-row { display: flex; justify-content: space-between; padding: 10px 16px; font-size: 0.85rem; border-bottom: 1px solid var(--border); }
     .totals-row:last-child { border-bottom: none; background: var(--surface-2); font-weight: 700; font-family: 'Syne', sans-serif; }
-    
-    /* Mobile Responsive */
-    @media (max-width: 1024px) {
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .main-grid, .bottom-grid { grid-template-columns: 1fr; }
-      .kpi-grid { grid-template-columns: repeat(1, 1fr); }
-      .contracts-grid { grid-template-columns: 1fr; }
-      .customers-grid { grid-template-columns: 1fr; }
-      .chart-bars { gap: 8px; }
-    }
-    
-    @media (max-width: 768px) {
-      .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; width: 280px; }
-      .sidebar.open { transform: translateX(0); }
-      .main-content { margin-left: 0; padding: 70px 16px 16px 16px; }
-      .mobile-menu-btn { display: block; }
-      .sidebar-overlay.open { display: block; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .header { flex-direction: column; align-items: flex-start; }
-      .header-actions { width: 100%; justify-content: space-between; }
-      .filters-row { flex-direction: column; align-items: stretch; }
-      .filter-input, .filter-select { width: 100%; }
-      .line-items-header, .line-item-row { grid-template-columns: 2fr 1fr 1fr; }
-      .line-items-header span:nth-child(4), .line-items-header span:nth-child(5),
-      .line-item-row .line-item-total, .line-item-row .btn-remove { display: none; }
-    }
   </style>
 </head>
 <body>
 <div id="app">Loading...</div>
 
 <script>
+  // ============================================================
+  // FIX #6: PERFORMANCE - Cached API Data
+  // ============================================================
+  let cachedData = {
+    clients: null,
+    technicians: null,
+    sites: null,
+    services: null,
+    jobs: null,
+    amcs: null,
+    invoices: null,
+    assets: null,
+    quotations: null
+  };
+
   const API = '/api';
   let token = null;
   let user = null;
@@ -354,15 +652,6 @@
   let customerFilterType = 'all';
   let customerSearchQuery = '';
 
-  function toggleSidebar() { sidebarOpen = !sidebarOpen; updateSidebar(); }
-  function closeSidebar() { sidebarOpen = false; updateSidebar(); }
-  function updateSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = document.querySelector('.sidebar-overlay');
-    if (sidebar) sidebar.classList.toggle('open', sidebarOpen);
-    if (overlay) overlay.classList.toggle('open', sidebarOpen);
-  }
-
   async function fetchAPI(endpoint, options = {}) {
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -372,6 +661,69 @@
     return res.json();
   }
 
+  async function fetchWithCache(endpoint, forceRefresh = false) {
+    const cacheKey = endpoint.replace(/^\//, '');
+    if (!forceRefresh && cachedData[cacheKey]) {
+      return cachedData[cacheKey];
+    }
+    const data = await fetchAPI(endpoint);
+    cachedData[cacheKey] = data;
+    return data;
+  }
+
+  function clearCache() {
+    cachedData = {
+      clients: null,
+      technicians: null,
+      sites: null,
+      services: null,
+      jobs: null,
+      amcs: null,
+      invoices: null,
+      assets: null,
+      quotations: null
+    };
+  }
+
+  // ============================================================
+  // SVG ICON HELPERS
+  // ============================================================
+  function iconSVG(name, size = 20) {
+    const icons = {
+      dashboard: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
+      amc: `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
+      tasks: `<svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+      myTasks: `<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+      invoices: `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
+      assets: `<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`,
+      quotations: `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
+      customers: `<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+      sites: `<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+      technicians: `<svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`,
+      services: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
+      plus: `<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+      pdf: `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
+      logo: `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`
+    };
+    return icons[name] || icons.dashboard;
+  }
+
+  function iconHtml(name, className = '') {
+    return `<span class="icon ${className}">${iconSVG(name)}</span>`;
+  }
+
+  // ============================================================
+  // AUTH FUNCTIONS
+  // ============================================================
+  function toggleSidebar() { sidebarOpen = !sidebarOpen; updateSidebar(); }
+  function closeSidebar() { sidebarOpen = false; updateSidebar(); }
+  function updateSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (sidebar) sidebar.classList.toggle('open', sidebarOpen);
+    if (overlay) overlay.classList.toggle('open', sidebarOpen);
+  }
+
   async function login(email, password) {
     try {
       const res = await fetch(API + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
@@ -379,6 +731,7 @@
       const data = await res.json();
       token = data.token; user = data.user;
       localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user));
+      clearCache();
       renderApp();
     } catch (err) { document.getElementById('errorMsg') && (document.getElementById('errorMsg').innerText = err.message); }
   }
@@ -390,6 +743,7 @@
       const data = await res.json();
       token = data.token; user = data.user;
       localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user));
+      clearCache();
       renderApp();
     } catch (err) { document.getElementById('errorMsg') && (document.getElementById('errorMsg').innerText = err.message); }
   }
@@ -400,11 +754,12 @@
       const data = await res.json();
       token = data.token; user = data.user;
       localStorage.setItem('token', token); localStorage.setItem('user', JSON.stringify(user));
+      clearCache();
       renderApp();
     } catch (err) { showToast('Demo login failed: ' + err.message, 'error'); }
   }
 
-  function logout() { token = null; user = null; localStorage.clear(); renderApp(); }
+  function logout() { token = null; user = null; localStorage.clear(); clearCache(); renderApp(); }
 
   let showSignup = false;
   function toggleForm() { showSignup = !showSignup; renderApp(); }
@@ -482,6 +837,9 @@
     return Math.round((elapsed / total) * 100);
   }
 
+  // ============================================================
+  // RENDER APP
+  // ============================================================
   async function renderApp() {
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
@@ -522,13 +880,16 @@
     await showDashboard();
   }
 
+  // ============================================================
+  // SHOW DASHBOARD
+  // ============================================================
   async function showDashboard() {
     let jobs = [], clients = [], techs = [], invoices = [], amcs = [], sites = [], services = [], assets = [], quotations = [];
     try {
       [jobs, clients, techs, invoices, amcs, sites, services, assets, quotations] = await Promise.all([
-        fetchAPI('/jobs'), fetchAPI('/clients'), fetchAPI('/technicians'),
-        fetchAPI('/invoices'), fetchAPI('/amcs'), fetchAPI('/sites'),
-        fetchAPI('/services'), fetchAPI('/assets'), fetchAPI('/quotations')
+        fetchWithCache('/jobs'), fetchWithCache('/clients'), fetchWithCache('/technicians'),
+        fetchWithCache('/invoices'), fetchWithCache('/amcs'), fetchWithCache('/sites'),
+        fetchWithCache('/services'), fetchWithCache('/assets'), fetchWithCache('/quotations')
       ]);
     } catch(e) { console.error(e); }
 
@@ -539,17 +900,17 @@
     const pendingInvoices = invoices.filter(i => i.status !== 'Paid').length;
 
     const navItems = [
-      { page: 'dashboard', icon: '📊', label: 'Dashboard' },
-      { page: 'amc', icon: '📑', label: 'AMC Contracts' },
-      { page: 'tasks', icon: '⚡', label: 'Assigned Tasks' },
-      { page: 'myTasks', icon: '👨‍🔧', label: 'My Tasks' },
-      { page: 'invoices', icon: '🧾', label: 'Invoices' },
-      { page: 'assets', icon: '📦', label: 'Assets' },
-      { page: 'quotations', icon: '📝', label: 'Quotations' },
-      { page: 'customers', icon: '👥', label: 'Customers' },
-      { page: 'sites', icon: '📍', label: 'Sites' },
-      { page: 'technicians', icon: '🔧', label: 'Technicians' },
-      { page: 'services', icon: '📋', label: 'Services' }
+      { page: 'dashboard', label: 'Dashboard' },
+      { page: 'amc', label: 'AMC Contracts' },
+      { page: 'tasks', label: 'Assigned Tasks' },
+      { page: 'myTasks', label: 'My Tasks' },
+      { page: 'invoices', label: 'Invoices' },
+      { page: 'assets', label: 'Assets' },
+      { page: 'quotations', label: 'Quotations' },
+      { page: 'customers', label: 'Customers' },
+      { page: 'sites', label: 'Sites' },
+      { page: 'technicians', label: 'Technicians' },
+      { page: 'services', label: 'Services' }
     ];
 
     document.getElementById('app').innerHTML = `
@@ -558,12 +919,15 @@
       <div class="app-container">
         <div class="sidebar">
           <div class="sidebar-logo">
-            <h2>Maint<span>Flow</span></h2>
-            <p>HVAC · MEP · Civil</p>
+            <div class="logo-icon">${iconSVG('logo')}</div>
+            <div class="logo-text">
+              <h2>Maint<span>Flow</span></h2>
+              <p>HVAC · MEP · Civil</p>
+            </div>
           </div>
           ${navItems.map(item => `
             <div class="nav-item ${currentPage === item.page ? 'active' : ''}" data-page="${item.page}">
-              <span>${item.icon}</span>
+              ${iconHtml(item.page)}
               <span>${item.label}</span>
             </div>
           `).join('')}
@@ -575,8 +939,8 @@
               <div><h1>Maintenance <span>Flow</span></h1><p>HVAC • MEP • Electrical • Plumbing • Civil</p></div>
             </div>
             <div class="header-actions">
-              <button class="btn-primary" id="quickTicketBtn">➕ Create Service Ticket</button>
-              <button class="btn-secondary" id="quickInvoiceHeaderBtn">🧾 Generate Invoice</button>
+              <button class="btn-primary" id="quickTicketBtn">${iconHtml('plus')} Create Service Ticket</button>
+              <button class="btn-secondary" id="quickInvoiceHeaderBtn">${iconHtml('invoices')} Generate Invoice</button>
               <div class="user-info">
                 <span>👤 ${user?.email || user?.company_name || 'Demo'} (${user?.currency || 'AED'})</span>
                 <button class="logout-btn" onclick="logout()">Logout</button>
@@ -601,7 +965,7 @@
 
     const container = document.getElementById('page-container');
     
-    // ==================== DASHBOARD PAGE (Fixed Alignment) ====================
+    // ==================== DASHBOARD PAGE ====================
     if (currentPage === 'dashboard') {
       const techsWithJobs = techs.map(t => ({
         ...t,
@@ -619,8 +983,8 @@
         <div class="main-grid">
           <div class="card">
             <div class="card-header">
-              <div class="card-title">📋 Live Service Jobs</div>
-              <button class="btn-outline" onclick="showAddJobModal()">+ New Job</button>
+              <div class="card-title">${iconHtml('tasks')} Live Service Jobs</div>
+              <button class="btn-outline" onclick="showAddJobModal()">${iconHtml('plus')} New Job</button>
             </div>
             <div class="table-responsive">
               <table>
@@ -646,7 +1010,7 @@
 
           <div class="card">
             <div class="card-header">
-              <div class="card-title">👨‍🔧 Technician Dispatch</div>
+              <div class="card-title">${iconHtml('technicians')} Technician Dispatch</div>
               <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;">Daily assignments</div>
             </div>
             <div class="dispatch-list">
@@ -668,8 +1032,8 @@
         <div class="bottom-grid">
           <div class="card">
             <div class="card-header">
-              <div class="card-title">📑 AMC Contracts</div>
-              <button class="btn-outline" onclick="showAddAmcModal()">+ Add AMC</button>
+              <div class="card-title">${iconHtml('amc')} AMC Contracts</div>
+              <button class="btn-outline" onclick="showAddAmcModal()">${iconHtml('plus')} Add AMC</button>
             </div>
             <div class="amc-list">
               ${amcs.slice(0,3).map(a => `
@@ -689,21 +1053,21 @@
           </div>
           <div class="card">
             <div class="card-header">
-              <div class="card-title">⚡ Quick Actions</div>
+              <div class="card-title">${iconHtml('tasks')} Quick Actions</div>
             </div>
             <div class="actions-grid">
-              <button class="action-btn" onclick="showAddQuotationModal()"><div class="action-btn-title">📄 Create Quotation</div><div class="action-btn-sub">Generate estimate</div></button>
-              <button class="action-btn" onclick="alert('Reassign technician - Go to Tasks page')"><div class="action-btn-title">🔄 Reassign Technician</div><div class="action-btn-sub">Dispatch field staff</div></button>
-              <button class="action-btn" onclick="alert('Inventory usage tracking - Coming soon')"><div class="action-btn-title">📦 Inventory Usage</div><div class="action-btn-sub">Track spare parts</div></button>
-              <button class="action-btn" onclick="showAddInvoiceModal()"><div class="action-btn-title">💰 Generate Invoice</div><div class="action-btn-sub">VAT enabled PDF</div></button>
+              <button class="action-btn" onclick="showAddQuotationModal()"><div class="action-btn-title">${iconHtml('quotations')} Create Quotation</div><div class="action-btn-sub">Generate estimate</div></button>
+              <button class="action-btn" onclick="alert('Reassign technician - Go to Tasks page')"><div class="action-btn-title">${iconHtml('technicians')} Reassign Technician</div><div class="action-btn-sub">Dispatch field staff</div></button>
+              <button class="action-btn" onclick="alert('Inventory usage tracking - Coming soon')"><div class="action-btn-title">${iconHtml('assets')} Inventory Usage</div><div class="action-btn-sub">Track spare parts</div></button>
+              <button class="action-btn" onclick="showAddInvoiceModal()"><div class="action-btn-title">${iconHtml('invoices')} Generate Invoice</div><div class="action-btn-sub">VAT enabled PDF</div></button>
             </div>
           </div>
         </div>
 
         <div class="dashboard-banner">
           <div class="card-header">
-            <div class="card-title">📊 Management Dashboard</div>
-            <button class="btn-outline" onclick="alert('Export report - Coming soon')">📎 Export Report</button>
+            <div class="card-title">${iconHtml('dashboard')} Management Dashboard</div>
+            <button class="btn-outline" onclick="alert('Export report - Coming soon')">${iconHtml('pdf')} Export Report</button>
           </div>
           <div class="kpi-grid">
             <div class="kpi-item"><div class="kpi-label">Customer Satisfaction</div><div class="kpi-value">92%</div></div>
@@ -714,7 +1078,7 @@
       `;
     }
     
-    // ==================== MY TASKS PAGE (Technician View) ====================
+    // ==================== MY TASKS PAGE ====================
     else if (currentPage === 'myTasks') {
       const currentTechnician = user?.email === 'demo@maintain.com' ? 'Ahmed' : (user?.name || 'Technician');
       let myJobs = jobs.filter(j => j.technician === currentTechnician || j.technician === 'Ahmed' || j.technician === 'Ahmed K.');
@@ -803,7 +1167,7 @@
         <div class="filters-row">
           <div class="filter-group" style="flex:1"><div class="filter-label">Search</div><input class="filter-input" id="amcSearchInput" placeholder="Client name..."></div>
           <div class="filter-group"><div class="filter-label">Status</div><select class="filter-select" id="amcStatusFilter"><option value="all">All Status</option><option value="active">Active</option><option value="expiring">Expiring Soon</option><option value="expired">Expired</option></select></div>
-          <div class="filter-group"><button class="btn-primary" id="addAmcBtnAMCPage" style="margin-top:20px;">+ New Contract</button></div>
+          <div class="filter-group"><button class="btn-primary" id="addAmcBtnAMCPage" style="margin-top:20px;">${iconHtml('plus')} New Contract</button></div>
         </div>
         <div class="contracts-grid" id="amcContractsGrid">
           ${filteredAmcs.map(a => {
@@ -823,7 +1187,7 @@
           }).join('')}
           ${filteredAmcs.length === 0 ? '<div class="empty" style="grid-column:1/-1;text-align:center;padding:60px;">No AMC contracts found</div>' : ''}
         </div>
-        <div class="card"><div class="card-header"><div class="card-title">📅 Upcoming Scheduled Visits</div></div><div class="visits-list">${upcomingVisits.map(v => { const visitDate = v.expiry ? new Date(v.expiry) : new Date(); visitDate.setDate(visitDate.getDate() - 15); return `<div class="visit-item"><div class="visit-date"><div class="visit-date-day">${visitDate.getDate()}</div><div class="visit-date-month">${visitDate.toLocaleString('default', { month: 'short' })}</div></div><div class="visit-info"><div class="visit-client">${v.client_name}</div><div class="visit-type">${v.contract_type || 'AMC Service'} — Visit ${(v.visits_done || 0) + 1} of ${v.visits_per_year || 4}</div></div><div class="visit-tech">${v.technician || 'Unassigned'}</div></div>`; }).join('')}${upcomingVisits.length === 0 ? '<div class="empty">No upcoming visits scheduled</div>' : ''}</div></div>
+        <div class="card"><div class="card-header"><div class="card-title">${iconHtml('sites')} Upcoming Scheduled Visits</div></div><div class="visits-list">${upcomingVisits.map(v => { const visitDate = v.expiry ? new Date(v.expiry) : new Date(); visitDate.setDate(visitDate.getDate() - 15); return `<div class="visit-item"><div class="visit-date"><div class="visit-date-day">${visitDate.getDate()}</div><div class="visit-date-month">${visitDate.toLocaleString('default', { month: 'short' })}</div></div><div class="visit-info"><div class="visit-client">${v.client_name}</div><div class="visit-type">${v.contract_type || 'AMC Service'} — Visit ${(v.visits_done || 0) + 1} of ${v.visits_per_year || 4}</div></div><div class="visit-tech">${v.technician || 'Unassigned'}</div></div>`; }).join('')}${upcomingVisits.length === 0 ? '<div class="empty">No upcoming visits scheduled</div>' : ''}</div></div>
       `;
       document.getElementById('amcSearchInput')?.addEventListener('input', (e) => { amcSearchQuery = e.target.value; renderApp(); });
       document.getElementById('amcStatusFilter')?.addEventListener('change', (e) => { amcFilterStatus = e.target.value; renderApp(); });
@@ -868,20 +1232,55 @@
           <div class="stat-card expiring"><div class="stat-label">Regular Clients</div><div class="stat-value" style="color:var(--blue)">${regularClients}</div><div class="stat-sub">Ad-hoc service calls</div></div>
           <div class="stat-card expired"><div class="stat-label">New This Month</div><div class="stat-value" style="color:var(--accent)">${newThisMonth}</div><div class="stat-sub">Added in ${new Date().toLocaleString('default', { month: 'long' })}</div></div>
         </div>
-        <div class="filters-row"><div class="filter-group" style="flex:1"><div class="filter-label">Search</div><input class="filter-input" id="customerSearchInput" placeholder="Customer name, contact, phone..."></div><div class="filter-group"><div class="filter-label">Type</div><select class="filter-select" id="customerTypeFilter"><option value="all">All Types</option><option value="amc">AMC Client</option><option value="regular">Regular</option></select></div><div class="filter-group"><button class="btn-primary" id="exportCustomerBtn" style="margin-top:20px;">📎 Export List</button></div></div>
+        <div class="filters-row"><div class="filter-group" style="flex:1"><div class="filter-label">Search</div><input class="filter-input" id="customerSearchInput" placeholder="Customer name, contact, phone..."></div><div class="filter-group"><div class="filter-label">Type</div><select class="filter-select" id="customerTypeFilter"><option value="all">All Types</option><option value="amc">AMC Client</option><option value="regular">Regular</option></select></div><div class="filter-group"><button class="btn-primary" id="exportCustomerBtn" style="margin-top:20px;">${iconHtml('pdf')} Export List</button></div></div>
         <div class="customers-grid" id="customersGrid">${filteredCustomers.map(c => { const stats = getCustomerStats(c.id, c.name); const avatarLetter = c.name?.charAt(0).toUpperCase() || '?'; const isAmcClient = stats.amcs > 0; const sinceDate = c.since_date ? new Date(c.since_date).toLocaleDateString() : (c.created_at ? new Date(c.created_at).toLocaleDateString() : '-'); return `<div class="customer-card"><div class="customer-top"><div class="customer-avatar">${avatarLetter}${c.name?.charAt(1) || ''}</div><div class="customer-name-section"><div class="customer-name">${c.name || 'Unknown'}</div><div class="customer-type">${c.customer_type || (isAmcClient ? 'Commercial' : 'Regular')}</div></div><span class="badge ${isAmcClient ? 'badge-active' : 'badge-expiring'}">${isAmcClient ? 'AMC Client' : 'Regular'}</span></div><div class="customer-info-grid"><div class="info-item"><div class="info-label">Contact Person</div><div class="info-value">${c.contact || '-'}</div></div><div class="info-item"><div class="info-label">Phone</div><div class="info-value"><a href="tel:${c.phone}" style="color:var(--accent); text-decoration:none;">${c.phone || '-'}</a></div></div><div class="info-item"><div class="info-label">Email</div><div class="info-value">${c.email || '-'}</div></div><div class="info-item"><div class="info-label">Area</div><div class="info-value">${c.area || c.city || '-'}</div></div><div class="info-item"><div class="info-label">TRN / VAT</div><div class="info-value">${c.trn_number || c.vat_number || '-'}</div></div><div class="info-item"><div class="info-label">Since</div><div class="info-value">${sinceDate}</div></div></div><div class="customer-stats"><div class="cstat"><div class="cstat-value">${stats.tickets}</div><div class="cstat-label">Tickets</div></div><div class="cstat"><div class="cstat-value">${stats.amcs}</div><div class="cstat-label">AMC</div></div><div class="cstat"><div class="cstat-value" style="color:var(--green)">${sym} ${stats.revenue.toLocaleString()}</div><div class="cstat-label">Revenue</div></div></div><div class="customer-footer"><button class="btn-sm btn-sm-ghost" onclick="viewCustomerProfile('${c.id}')">View Profile</button><button class="btn-sm btn-sm-ghost" onclick="createTicketForCustomer('${c.id}', '${c.name.replace(/'/g, "\\'")}')">New Ticket</button><button class="btn-sm btn-sm-primary" onclick="createInvoiceForCustomer('${c.name.replace(/'/g, "\\'")}')">Invoice</button><button class="btn-sm btn-sm-ghost" onclick="editCustomer('${c.id}')">Edit</button><button class="btn-sm btn-sm-danger" onclick="deleteCustomer('${c.id}')">Delete</button></div></div>`; }).join('')}${filteredCustomers.length === 0 ? '<div class="empty" style="grid-column:1/-1;text-align:center;padding:60px;">No customers found</div>' : ''}</div>
-        <div class="dashboard-banner"><div class="card-header"><div class="card-title">👤 Add New Customer</div></div><div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;"><div><label>Customer Name *</label><input type="text" id="newCustName" placeholder="e.g., Al Noor Villa"></div><div><label>Customer Type</label><select id="newCustType"><option value="">Select type</option><option value="Residential">Residential</option><option value="Commercial">Commercial</option><option value="Industrial">Industrial</option><option value="Hospitality">Hospitality</option></select></div><div><label>Contact Person</label><input type="text" id="newCustContact" placeholder="e.g., Mr. Ahmed"></div><div><label>Phone Number *</label><input type="text" id="newCustPhone" placeholder="+971 50 000 0000"></div><div><label>WhatsApp Number</label><input type="text" id="newCustWhatsapp" placeholder="+971 50 000 0000"></div><div><label>Email Address</label><input type="email" id="newCustEmail" placeholder="email@example.com"></div><div><label>Area / Location</label><input type="text" id="newCustArea" placeholder="e.g., Dubai Marina"></div><div><label>City</label><input type="text" id="newCustCity" placeholder="e.g., Dubai"></div><div><label>Country</label><select id="newCustCountry"><option value="UAE">UAE</option><option value="Estonia">Estonia</option></select></div><div><label>Address</label><textarea id="newCustAddress" rows="1" placeholder="Full address..."></textarea></div><div><label>Postal Code</label><input type="text" id="newCustPostal" placeholder="Postal code"></div><div><label>TRN (UAE) / VAT (Estonia)</label><input type="text" id="newCustTax" placeholder="e.g., 100234567890003"></div><div><label>Currency</label><select id="newCustCurrency"><option value="AED">AED</option><option value="EUR">EUR</option></select></div><div><label>Notes</label><textarea id="newCustNotes" rows="1" placeholder="Additional notes..."></textarea></div><div><label>Status</label><select id="newCustStatus"><option value="active">Active</option><option value="inactive">Inactive</option></select></div></div><div class="form-actions" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;"><button class="btn-secondary" id="clearCustomerFormBtn">Clear</button><button class="btn-primary" id="saveCustomerBtn">Save Customer</button></div></div>
+        <div class="dashboard-banner"><div class="card-header"><div class="card-title">${iconHtml('customers')} Add New Customer</div></div><div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;"><div><label>Customer Name *</label><input type="text" id="newCustName" placeholder="e.g., Al Noor Villa"></div><div><label>Customer Type</label><select id="newCustType"><option value="">Select type</option><option value="Residential">Residential</option><option value="Commercial">Commercial</option><option value="Industrial">Industrial</option><option value="Hospitality">Hospitality</option></select></div><div><label>Contact Person</label><input type="text" id="newCustContact" placeholder="e.g., Mr. Ahmed"></div><div><label>Phone Number *</label><input type="text" id="newCustPhone" placeholder="+971 50 000 0000"></div><div><label>WhatsApp Number</label><input type="text" id="newCustWhatsapp" placeholder="+971 50 000 0000"></div><div><label>Email Address</label><input type="email" id="newCustEmail" placeholder="email@example.com"></div><div><label>Area / Location</label><input type="text" id="newCustArea" placeholder="e.g., Dubai Marina"></div><div><label>City</label><input type="text" id="newCustCity" placeholder="e.g., Dubai"></div><div><label>Country</label><select id="newCustCountry"><option value="UAE">UAE</option><option value="Estonia">Estonia</option></select></div><div><label>Address</label><textarea id="newCustAddress" rows="1" placeholder="Full address..."></textarea></div><div><label>Postal Code</label><input type="text" id="newCustPostal" placeholder="Postal code"></div><div><label>TRN (UAE) / VAT (Estonia)</label><input type="text" id="newCustTax" placeholder="e.g., 100234567890003"></div><div><label>Currency</label><select id="newCustCurrency"><option value="AED">AED</option><option value="EUR">EUR</option></select></div><div><label>Notes</label><textarea id="newCustNotes" rows="1" placeholder="Additional notes..."></textarea></div><div><label>Status</label><select id="newCustStatus"><option value="active">Active</option><option value="inactive">Inactive</option></select></div></div><div class="form-actions" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;"><button class="btn-secondary" id="clearCustomerFormBtn">Clear</button><button class="btn-primary" id="saveCustomerBtn">Save Customer</button></div></div>
       `;
       document.getElementById('customerSearchInput')?.addEventListener('input', (e) => { customerSearchQuery = e.target.value; renderApp(); });
       document.getElementById('customerTypeFilter')?.addEventListener('change', (e) => { customerFilterType = e.target.value; renderApp(); });
       document.getElementById('exportCustomerBtn')?.addEventListener('click', () => exportCustomersToCSV(filteredCustomers, sym));
-      document.getElementById('saveCustomerBtn')?.addEventListener('click', async () => { const name = document.getElementById('newCustName').value.trim(); if (!name) { showToast('Customer name required', 'error'); return; } const customerData = { name: name, customer_type: document.getElementById('newCustType').value || null, contact: document.getElementById('newCustContact').value || null, phone: document.getElementById('newCustPhone').value || null, whatsapp: document.getElementById('newCustWhatsapp').value || null, email: document.getElementById('newCustEmail').value || null, area: document.getElementById('newCustArea').value || null, city: document.getElementById('newCustCity').value || null, country: document.getElementById('newCustCountry').value || 'UAE', address: document.getElementById('newCustAddress').value || null, postal_code: document.getElementById('newCustPostal').value || null, trn_number: document.getElementById('newCustTax').value || null, currency: document.getElementById('newCustCurrency').value || 'AED', notes: document.getElementById('newCustNotes').value || null, status: document.getElementById('newCustStatus').value || 'active' }; await fetchAPI('/clients', { method: 'POST', body: JSON.stringify(customerData) }); showToast('Customer added successfully!', 'success'); document.getElementById('newCustName').value = ''; document.getElementById('newCustContact').value = ''; document.getElementById('newCustPhone').value = ''; document.getElementById('newCustEmail').value = ''; renderApp(); });
+      document.getElementById('saveCustomerBtn')?.addEventListener('click', async () => { const name = document.getElementById('newCustName').value.trim(); if (!name) { showToast('Customer name required', 'error'); return; } const customerData = { name: name, customer_type: document.getElementById('newCustType').value || null, contact: document.getElementById('newCustContact').value || null, phone: document.getElementById('newCustPhone').value || null, whatsapp: document.getElementById('newCustWhatsapp').value || null, email: document.getElementById('newCustEmail').value || null, area: document.getElementById('newCustArea').value || null, city: document.getElementById('newCustCity').value || null, country: document.getElementById('newCustCountry').value || 'UAE', address: document.getElementById('newCustAddress').value || null, postal_code: document.getElementById('newCustPostal').value || null, trn_number: document.getElementById('newCustTax').value || null, currency: document.getElementById('newCustCurrency').value || 'AED', notes: document.getElementById('newCustNotes').value || null, status: document.getElementById('newCustStatus').value || 'active' }; await fetchAPI('/clients', { method: 'POST', body: JSON.stringify(customerData) }); showToast('Customer added successfully!', 'success'); document.getElementById('newCustName').value = ''; document.getElementById('newCustContact').value = ''; document.getElementById('newCustPhone').value = ''; document.getElementById('newCustEmail').value = ''; clearCache(); renderApp(); });
       document.getElementById('clearCustomerFormBtn')?.addEventListener('click', () => { document.getElementById('newCustName').value = ''; document.getElementById('newCustType').value = ''; document.getElementById('newCustContact').value = ''; document.getElementById('newCustPhone').value = ''; document.getElementById('newCustWhatsapp').value = ''; document.getElementById('newCustEmail').value = ''; document.getElementById('newCustArea').value = ''; document.getElementById('newCustCity').value = ''; document.getElementById('newCustAddress').value = ''; document.getElementById('newCustPostal').value = ''; document.getElementById('newCustTax').value = ''; document.getElementById('newCustNotes').value = ''; showToast('Form cleared', 'info'); });
     }
     
     // ==================== SITES PAGE ====================
     else if (currentPage === 'sites') {
-      container.innerHTML = `<div class="card"><div class="card-header"><div class="card-title">📍 All Sites</div><button class="btn-primary" onclick="showAddSiteModal()">+ Add Site</button></div><div class="table-responsive"><tr><thead><tr><th>Site Name</th><th>Customer</th><th>Address</th><th>Contact Person</th><th>Phone</th><th>Actions</th></tr></thead><tbody>${sites.map(s => { const c = clients.find(c => c.id === s.customer_id); return `<tr><td><strong>${s.name}</strong></td><td>${c ? c.name : '-'}</td><td>${s.address || '-'}</td><td>${s.contact_person || '-'}</td><td>${s.phone || '-'}</td><td class="action-buttons"><button class="btn-sm btn-sm-primary" onclick="deleteSite('${s.id}')">Delete</button></td></tr>`; }).join('')}${sites.length === 0 ? '<tr><td colspan="6" class="empty">No sites yet</div>' : ''}</tbody>}</div></div>`;
+      container.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">${iconHtml('sites')} All Sites</div>
+            <button class="btn-primary" onclick="showAddSiteModal()">${iconHtml('plus')} Add Site</button>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Site Name</th>
+                  <th>Customer</th>
+                  <th>Address</th>
+                  <th>Contact Person</th>
+                  <th>Phone</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sites.map(s => {
+                  const c = clients.find(c => c.id === s.customer_id);
+                  return `<tr>
+                    <td><strong>${s.name}</strong></td>
+                    <td>${c ? c.name : '-'}</td>
+                    <td>${s.address || '-'}</td>
+                    <td>${s.contact_person || '-'}</td>
+                    <td>${s.phone || '-'}</td>
+                    <td class="action-buttons"><button class="btn-sm btn-sm-primary" onclick="deleteSite('${s.id}')">Delete</button></td>
+                  </tr>`;
+                }).join('')}
+                ${sites.length === 0 ? '<tr><td colspan="6" class="empty">No sites yet</td></tr>' : ''}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
     }
     
     // ==================== INVOICES PAGE ====================
@@ -899,9 +1298,9 @@
       container.innerHTML = `
         <div class="stats-grid"><div class="stat-card total"><div class="stat-label">Total Invoiced</div><div class="stat-value">${sym} ${totalInvoiced.toLocaleString()}</div><div class="stat-sub">All time</div></div><div class="stat-card active"><div class="stat-label">Collected</div><div class="stat-value" style="color:var(--green)">${sym} ${collected.toLocaleString()}</div><div class="stat-sub">${invoices.filter(i => i.status === 'Paid').length} invoices paid</div></div><div class="stat-card expiring"><div class="stat-label">Pending</div><div class="stat-value" style="color:var(--amber)">${sym} ${pending.toLocaleString()}</div><div class="stat-sub">${invoices.filter(i => i.status === 'Pending').length} awaiting payment</div></div><div class="stat-card expired"><div class="stat-label">Overdue</div><div class="stat-value" style="color:var(--red)">${sym} ${overdue.toLocaleString()}</div><div class="stat-sub">${overdueCount} invoices overdue</div></div></div>
         ${overdueCount > 0 ? `<div class="alert-banner"><span>🔴</span><div class="alert-text"><strong>${overdueCount} invoice(s) overdue.</strong> Send payment reminders now.</div><div class="alert-action">Send Reminders →</div></div>` : ''}
-        <div class="filters-row"><div class="filter-group" style="flex:1"><div class="filter-label">Search</div><input class="filter-input" id="invoiceSearchInput" placeholder="Invoice #, client name..."></div><div class="filter-group"><div class="filter-label">Status</div><select class="filter-select" id="invoiceStatusFilter"><option value="all">All Status</option><option value="Paid">Paid</option><option value="Pending">Pending</option><option value="Overdue">Overdue</option></select></div><div class="filter-group"><div class="filter-label">Month</div><select class="filter-select" id="invoiceMonthFilter"><option value="all">All Months</option><option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option></select></div><div class="filter-group"><button class="btn-primary" id="exportInvoiceBtn" style="margin-top:20px;">📎 Export Report</button></div></div>
-        <div class="card"><div class="card-header"><div class="card-title">🧾 All Invoices</div><button class="btn-primary" id="newInvoiceBtn">+ Create Invoice</button></div><div class="table-responsive"><table id="invoicesTable"><thead><tr><th>Invoice #</th><th>Client / Ref</th><th>Service</th><th>Issue Date</th><th>Due Date</th><th>Amount (${sym})</th><th>Status</th><th>Actions</th></tr></thead><tbody id="invoicesTableBody">${invoices.map(inv => { const statusClass = inv.status === 'Paid' ? 'badge-active' : (inv.status === 'Overdue' ? 'badge-expired' : 'badge-expiring'); const statusText = inv.status === 'Overdue' ? 'Overdue' : (inv.status || 'Pending'); const dueDate = inv.due_date ? new Date(inv.due_date).toLocaleDateString() : '-'; const issueDate = inv.date ? new Date(inv.date).toLocaleDateString() : '-'; const amount = inv.amount || inv.total || 0; const vatAmount = inv.vat_amount || (amount * 0.05); return `<tr data-status="${inv.status || 'Pending'}" data-client="${(inv.client_name || '').toLowerCase()}" data-invnumber="${(inv.invoice_number || '').toLowerCase()}" data-date="${inv.date || ''}"><td><strong>${inv.invoice_number || 'INV-' + inv.id}</strong></td><td><div><strong>${inv.client_name || '-'}</strong></div><div style="font-size:0.65rem;color:var(--text-muted)">${inv.reference || '—'}</div></td><td>${inv.description || '-'}</td><td>${issueDate}</td><td>${dueDate}</td><td><div style="font-weight:600">${sym} ${amount.toLocaleString()}</div><div style="font-size:0.6rem;color:var(--text-muted)">Incl. 5% VAT (${sym} ${vatAmount.toLocaleString()})</div></td><td><span class="badge ${statusClass}">${statusText}</span></td><td class="action-buttons"><button class="btn-sm btn-sm-ghost" onclick="viewInvoiceDetails('${inv.id}')">View</button><button class="btn-sm btn-sm-ghost" onclick='generatePDFInvoice("${inv.client_name}", "${inv.description || 'Service'}", ${amount})'>PDF</button>${inv.status !== 'Paid' ? `<button class="btn-sm btn-sm-primary" onclick="markInvoicePaid('${inv.id}')">Mark Paid</button>` : ''}</td></tr>`; }).join('')}${invoices.length === 0 ? '<tr><td colspan="8" class="empty">No invoices yet. Click "+ Create Invoice"</td></tr>' : ''}</tbody></table></div></div>
-        <div class="dashboard-banner"><div class="card-header"><div class="card-title">📊 Monthly Revenue</div><div style="font-size:0.7rem;color:var(--text-muted)">Last 6 months (paid invoices)</div></div><div class="chart-bars">${months.map((month, idx) => { const height = (monthlyData[idx] / maxRevenue) * 120; const isCurrent = idx === months.length - 1; return `<div class="bar-wrap"><div class="bar" style="height:${height}px; background:${isCurrent ? 'var(--accent)' : 'var(--text-muted)'}"></div><div class="bar-label">${month}</div><div class="bar-amount">${sym} ${(monthlyData[idx] / 1000).toFixed(0)}K</div></div>`; }).join('')}</div></div>
+        <div class="filters-row"><div class="filter-group" style="flex:1"><div class="filter-label">Search</div><input class="filter-input" id="invoiceSearchInput" placeholder="Invoice #, client name..."></div><div class="filter-group"><div class="filter-label">Status</div><select class="filter-select" id="invoiceStatusFilter"><option value="all">All Status</option><option value="Paid">Paid</option><option value="Pending">Pending</option><option value="Overdue">Overdue</option></select></div><div class="filter-group"><div class="filter-label">Month</div><select class="filter-select" id="invoiceMonthFilter"><option value="all">All Months</option><option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option></select></div><div class="filter-group"><button class="btn-primary" id="exportInvoiceBtn" style="margin-top:20px;">${iconHtml('pdf')} Export Report</button></div></div>
+        <div class="card"><div class="card-header"><div class="card-title">${iconHtml('invoices')} All Invoices</div><button class="btn-primary" id="newInvoiceBtn">${iconHtml('plus')} Create Invoice</button></div><div class="table-responsive"><table id="invoicesTable"><thead><tr><th>Invoice #</th><th>Client / Ref</th><th>Service</th><th>Issue Date</th><th>Due Date</th><th class="amount-cell">Amount (${sym})</th><th>Status</th><th>Actions</th></tr></thead><tbody id="invoicesTableBody">${invoices.map(inv => { const statusClass = inv.status === 'Paid' ? 'badge-active' : (inv.status === 'Overdue' ? 'badge-expired' : 'badge-expiring'); const statusText = inv.status === 'Overdue' ? 'Overdue' : (inv.status || 'Pending'); const dueDate = inv.due_date ? new Date(inv.due_date).toLocaleDateString() : '-'; const issueDate = inv.date ? new Date(inv.date).toLocaleDateString() : '-'; const amount = inv.amount || inv.total || 0; const vatAmount = inv.vat_amount || (amount * 0.05); return `<tr data-status="${inv.status || 'Pending'}" data-client="${(inv.client_name || '').toLowerCase()}" data-invnumber="${(inv.invoice_number || '').toLowerCase()}" data-date="${inv.date || ''}"><td><strong>${inv.invoice_number || 'INV-' + inv.id}</strong></td><td><div><strong>${inv.client_name || '-'}</strong></div><div style="font-size:0.65rem;color:var(--text-muted)">${inv.reference || '—'}</div></td><td>${inv.description || '-'}</td><td>${issueDate}</td><td>${dueDate}</td><td class="amount-cell"><div style="font-weight:600">${sym} ${amount.toLocaleString()}</div><div style="font-size:0.6rem;color:var(--text-muted)">Incl. 5% VAT (${sym} ${vatAmount.toLocaleString()})</div></td><td><span class="badge ${statusClass}">${statusText}</span></td><td class="action-buttons"><button class="btn-sm btn-sm-ghost" onclick="viewInvoiceDetails('${inv.id}')">View</button><button class="btn-sm btn-sm-ghost" onclick='generatePDFInvoice("${inv.client_name}", "${inv.description || 'Service'}", ${amount})'>${iconHtml('pdf')}</button>${inv.status !== 'Paid' ? `<button class="btn-sm btn-sm-primary" onclick="markInvoicePaid('${inv.id}')">Mark Paid</button>` : ''}</td></tr>`; }).join('')}${invoices.length === 0 ? '<tr><td colspan="8" class="empty">No invoices yet. Click "+ Create Invoice"</td></tr>' : ''}</tbody></table></div></div>
+        <div class="dashboard-banner"><div class="card-header"><div class="card-title">${iconHtml('dashboard')} Monthly Revenue</div><div style="font-size:0.7rem;color:var(--text-muted)">Last 6 months (paid invoices)</div></div><div class="chart-bars">${months.map((month, idx) => { const height = (monthlyData[idx] / maxRevenue) * 120; const isCurrent = idx === months.length - 1; return `<div class="bar-wrap"><div class="bar" style="height:${height}px; background:${isCurrent ? 'var(--accent)' : 'var(--text-muted)'}"></div><div class="bar-label">${month}</div><div class="bar-amount">${sym} ${(monthlyData[idx] / 1000).toFixed(0)}K</div></div>`; }).join('')}</div></div>
       `;
       const filterInvoices = () => { const searchTerm = document.getElementById('invoiceSearchInput')?.value.toLowerCase() || ''; const statusFilter = document.getElementById('invoiceStatusFilter')?.value || 'all'; const monthFilter = document.getElementById('invoiceMonthFilter')?.value || 'all'; const rows = document.querySelectorAll('#invoicesTableBody tr'); rows.forEach(row => { const status = row.dataset.status || ''; const client = row.dataset.client || ''; const invNumber = row.dataset.invnumber || ''; const invDate = row.dataset.date || ''; let matchesSearch = !searchTerm || client.includes(searchTerm) || invNumber.includes(searchTerm); let matchesStatus = statusFilter === 'all' || status === statusFilter; let matchesMonth = true; if (monthFilter !== 'all') { const dateParts = invDate.split('-'); if (dateParts.length >= 2) matchesMonth = parseInt(dateParts[1]) - 1 === parseInt(monthFilter); } row.style.display = (matchesSearch && matchesStatus && matchesMonth) ? '' : 'none'; }); };
       document.getElementById('invoiceSearchInput')?.addEventListener('input', filterInvoices);
@@ -913,53 +1312,608 @@
     
     // ==================== TECHNICIANS PAGE ====================
     else if (currentPage === 'technicians') {
-      container.innerHTML = `<div class="card"><div class="card-header"><div class="card-title">🔧 All Technicians</div><button class="btn-primary" onclick="showAddTechnicianModal()">+ Add Technician</button></div><div class="table-responsive"><table><thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody>${techs.map(t => `<tr>}<strong>${t.name}</strong></td><td>${t.role || '-'}</td><td>${t.email || '-'}</td><td>${t.phone || '-'}</td><td><span class="badge badge-active">${t.active ? 'Active' : 'Inactive'}</span></td><td><button class="btn-sm btn-sm-primary" onclick="deleteTechnician('${t.id}')">Delete</button></td></tr>`).join('')}${techs.length === 0 ? '<tr><td colspan="6" class="empty">No technicians yet</td>' : ''}</tbody>}</div></div>`;
+      container.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">${iconHtml('technicians')} All Technicians</div>
+            <button class="btn-primary" onclick="showAddTechnicianModal()">${iconHtml('plus')} Add Technician</button>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${techs.map(t => `
+                  <tr>
+                    <td><strong>${t.name}</strong></td>
+                    <td>${t.role || '-'}</td>
+                    <td>${t.email || '-'}</td>
+                    <td>${t.phone || '-'}</td>
+                    <td><span class="badge badge-active">${t.active ? 'Active' : 'Inactive'}</span></td>
+                    <td><button class="btn-sm btn-sm-primary" onclick="deleteTechnician('${t.id}')">Delete</button></td>
+                  </tr>
+                `).join('')}
+                ${techs.length === 0 ? '<tr><td colspan="6" class="empty">No technicians yet</td></tr>' : ''}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
     }
     
     // ==================== TASKS PAGE ====================
     else if (currentPage === 'tasks') {
-      container.innerHTML = `<div class="stats-grid"><div class="stat-card"><div class="stat-label">Total Tasks</div><div class="stat-value">${jobs.length}</div></div><div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value" style="color:var(--blue)">${jobs.filter(j => j.status === 'In Progress').length}</div></div><div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value" style="color:var(--green)">${jobs.filter(j => j.status === 'Completed').length}</div></div></div><div class="card"><div class="card-header"><div class="card-title">⚡ All Tasks</div><button class="btn-primary" onclick="showAddJobModal()">+ New Task</button></div><div class="table-responsive"></table><thead><tr><th>Customer</th><th>Service</th><th>Technician</th><th>Priority</th><th>Status</th><th>Actions</th></tr></thead><tbody>${jobs.map(j => `<tr><td>${j.customer_name || '-'}</td><td>${j.service || '-'}</td><td>${j.technician || '-'}</td><td><span class="priority-dot priority-${(j.priority || 'medium').toLowerCase()}">${j.priority || 'Medium'}</span></td><td><span class="badge ${j.status === 'Completed' ? 'badge-active' : 'badge-expiring'}">${j.status || 'Assigned'}</span></td><td><button class="btn-sm btn-sm-primary" onclick="updateJobStatus('${j.id}')">Update</button></td></tr>`).join('')}${jobs.length === 0 ? '<tr><td colspan="6" class="empty">No tasks yet</td></tr>' : ''}</tbody></table></div></div>`;
+      container.innerHTML = `
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Total Tasks</div><div class="stat-value">${jobs.length}</div></div>
+          <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value" style="color:var(--blue)">${jobs.filter(j => j.status === 'In Progress').length}</div></div>
+          <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value" style="color:var(--green)">${jobs.filter(j => j.status === 'Completed').length}</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">${iconHtml('tasks')} All Tasks</div>
+            <button class="btn-primary" onclick="showAddJobModal()">${iconHtml('plus')} New Task</button>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr><th>Customer</th><th>Service</th><th>Technician</th><th>Priority</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                ${jobs.map(j => `
+                  <tr>
+                    <td>${j.customer_name || '-'}</td>
+                    <td>${j.service || '-'}</td>
+                    <td>${j.technician || '-'}</td>
+                    <td><span class="priority-dot priority-${(j.priority || 'medium').toLowerCase()}">${j.priority || 'Medium'}</span></td>
+                    <td><span class="badge ${j.status === 'Completed' ? 'badge-active' : 'badge-expiring'}">${j.status || 'Assigned'}</span></td>
+                    <td><button class="btn-sm btn-sm-primary" onclick="updateJobStatus('${j.id}')">Update</button></td>
+                  </tr>
+                `).join('')}
+                ${jobs.length === 0 ? '<tr><td colspan="6" class="empty">No tasks yet</td></tr>' : ''}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
     }
     
-    // ==================== SERVICES PAGE ====================
+    // ==================== SERVICES PAGE (FIXED) ====================
     else if (currentPage === 'services') {
-      container.innerHTML = `<div class="card"><div class="card-header"><div class="card-title">📋 Service Catalog</div><button class="btn-primary" onclick="showAddServiceModal()">+ Add Service</button></div><div class="table-responsive"><tr><thead><tr><th>Service Name</th><th>Actions</th></tr></thead><tbody>${services.map(s => `<tr><td>${s.name}</td><td><button class="btn-sm btn-sm-danger" onclick="deleteService('${s.id}')">Delete</button></td></tr>`).join('')}${services.length === 0 ? '<tr><td colspan="2" class="empty">No services yet</td></tr>' : ''}</tbody></table></div></div>`;
+      container.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">${iconHtml('services')} Service Catalog</div>
+            <button class="btn-primary" onclick="showAddServiceModal()">${iconHtml('plus')} Add Service</button>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr><th>Service Name</th><th>Est. Duration (min)</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                ${services.map(s => `
+                  <tr>
+                    <td><strong>${s.name}</strong></td>
+                    <td>${s.estimated_duration_minutes || 60}</td>
+                    <td><button class="btn-sm btn-sm-danger" onclick="deleteService('${s.id}')">Delete</button></td>
+                  </tr>
+                `).join('')}
+                ${services.length === 0 ? '<tr><td colspan="3" class="empty">No services yet</td></tr>' : ''}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
     }
     
-    // ==================== ASSETS PAGE ====================
+    // ==================== ASSETS PAGE (FIXED) ====================
     else if (currentPage === 'assets') {
-      container.innerHTML = `<div class="card"><div class="card-header"><div class="card-title">📦 Assets</div><button class="btn-primary" onclick="showAddAssetModal()">+ Add Asset</button></div><div class="table-responsive"></table><thead><tr><th>Name</th><th>Type</th><th>Model</th><th>Serial #</th></tr></thead><tbody>${assets.map(a => `<tr><td><strong>${a.name}</strong></td><td>${a.asset_type || '-'}</td><td>${a.model || '-'}</td><td>${a.serial_number || '-'}</td></tr>`).join('')}${assets.length === 0 ? '<tr><td colspan="4" class="empty">No assets yet</td></tr>' : ''}</tbody></table></div></div>`;
+      container.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">${iconHtml('assets')} Assets</div>
+            <button class="btn-primary" onclick="showAddAssetModal()">${iconHtml('plus')} Add Asset</button>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr><th>Code</th><th>Name</th><th>Type</th><th>Manufacturer</th><th>Model</th><th>Serial #</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                ${assets.map(a => `
+                  <tr>
+                    <td><strong>${a.asset_code || '-'}</strong></td>
+                    <td>${a.name}</td>
+                    <td>${a.type || '-'}</td>
+                    <td>${a.manufacturer || '-'}</td>
+                    <td>${a.model || '-'}</td>
+                    <td>${a.serial_number || '-'}</td>
+                    <td><span class="badge ${a.status === 'Active' ? 'badge-active' : a.status === 'Inactive' ? 'badge-expired' : 'badge-expiring'}">${a.status || 'Active'}</span></td>
+                    <td><button class="btn-sm btn-sm-danger" onclick="deleteAsset('${a.id}')">Delete</button></td>
+                  </tr>
+                `).join('')}
+                ${assets.length === 0 ? '<tr><td colspan="8" class="empty">No assets yet</td></tr>' : ''}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
     }
     
-    // ==================== QUOTATIONS PAGE ====================
+    // ==================== QUOTATIONS PAGE (FIXED) ====================
     else if (currentPage === 'quotations') {
-      container.innerHTML = `<div class="card"><div class="card-header"><div class="card-title">📝 Quotations</div><button class="btn-primary" onclick="showAddQuotationModal()">+ New Quotation</button></div><div class="table-responsive"></table><thead><tr><th>Quote #</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th></tr></thead><tbody>${quotations.map(q => `<tr><td>${q.quote_number || 'N/A'}</td><td>${q.client_name || '-'}</td><td>${q.date || '-'}</td><td>${sym} ${(q.total || 0).toLocaleString()}</td><td><span class="badge badge-expiring">${q.status || 'Draft'}</span></td></tr>`).join('')}${quotations.length === 0 ? '<tr><td colspan="5" class="empty">No quotations yet</td></tr>' : ''}</tbody></table></div></div>`;
+      container.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">${iconHtml('quotations')} Quotations</div>
+            <button class="btn-primary" onclick="showAddQuotationModal()">${iconHtml('plus')} New Quotation</button>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Quote #</th>
+                  <th>Customer</th>
+                  <th>Date</th>
+                  <th>Valid Until</th>
+                  <th class="amount-cell">Total</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${quotations.map(q => `
+                  <tr>
+                    <td><strong>${q.quote_number || 'N/A'}</strong></td>
+                    <td>${q.client_name || '-'}</td>
+                    <td>${q.date ? new Date(q.date).toLocaleDateString() : '-'}</td>
+                    <td>${q.valid_until ? new Date(q.valid_until).toLocaleDateString() : '-'}</td>
+                    <td class="amount-cell">${sym} ${(q.total || 0).toLocaleString()}</td>
+                    <td><span class="badge ${q.status === 'Approved' ? 'badge-active' : q.status === 'Sent' ? 'badge-expiring' : 'badge-expired'}">${q.status || 'Draft'}</span></td>
+                    <td class="action-buttons">
+                      <button class="btn-sm btn-sm-ghost" onclick="viewQuotationDetails('${q.id}')">View</button>
+                      <button class="btn-sm btn-sm-primary" onclick="convertQuotationToJob('${q.id}')">Convert</button>
+                    </td>
+                  </tr>
+                `).join('')}
+                ${quotations.length === 0 ? '<tr><td colspan="7" class="empty">No quotations yet</td></tr>' : ''}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
     }
   }
 
-  // ==================== HELPER FUNCTIONS ====================
+  // ============================================================
+  // MODAL FUNCTIONS
+  // ============================================================
+
+  // ============================================================
+  // FIX: ADD ASSET MODAL (Complete)
+  // ============================================================
+  window.showAddAssetModal = async () => {
+    const [clients, sites] = await Promise.all([
+      fetchWithCache('/clients'),
+      fetchWithCache('/sites')
+    ]);
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 700px;">
+        <h3>${iconHtml('assets')} Add New Asset</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div>
+            <label>Asset Code *</label>
+            <input type="text" id="assetCode" placeholder="e.g., AC-001">
+          </div>
+          <div>
+            <label>Asset Name *</label>
+            <input type="text" id="assetName" placeholder="e.g., Chiller Unit">
+          </div>
+          <div>
+            <label>Type</label>
+            <input type="text" id="assetType" placeholder="e.g., HVAC, Electrical">
+          </div>
+          <div>
+            <label>Manufacturer</label>
+            <input type="text" id="assetManufacturer" placeholder="e.g., Daikin">
+          </div>
+          <div>
+            <label>Model</label>
+            <input type="text" id="assetModel" placeholder="e.g., RZQ-100">
+          </div>
+          <div>
+            <label>Serial Number</label>
+            <input type="text" id="assetSerial" placeholder="Serial #">
+          </div>
+          <div>
+            <label>Installation Date</label>
+            <input type="date" id="assetInstallDate">
+          </div>
+          <div>
+            <label>Warranty Expiry</label>
+            <input type="date" id="assetWarrantyExpiry">
+          </div>
+          <div>
+            <label>Client</label>
+            <select id="assetClientId">
+              <option value="">None</option>
+              ${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label>Site</label>
+            <select id="assetSiteId">
+              <option value="">None</option>
+              ${sites.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label>Status</label>
+            <select id="assetStatus">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Maintenance">Maintenance</option>
+            </select>
+          </div>
+          <div style="grid-column: span 2;">
+            <label>Notes</label>
+            <textarea id="assetNotes" rows="2" placeholder="Additional notes..."></textarea>
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn-secondary" id="cancelAssetBtn">Cancel</button>
+          <button class="btn-primary" id="saveAssetBtn">Save Asset</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById('cancelAssetBtn').onclick = () => modal.remove();
+    document.getElementById('saveAssetBtn').onclick = async () => {
+      const name = document.getElementById('assetName').value.trim();
+      const assetCode = document.getElementById('assetCode').value.trim();
+      
+      if (!name) {
+        showToast('Asset name is required', 'error');
+        return;
+      }
+      if (!assetCode) {
+        showToast('Asset code is required', 'error');
+        return;
+      }
+      
+      const assetData = {
+        name: name,
+        asset_code: assetCode,
+        type: document.getElementById('assetType').value || null,
+        manufacturer: document.getElementById('assetManufacturer').value || null,
+        model: document.getElementById('assetModel').value || null,
+        serial_number: document.getElementById('assetSerial').value || null,
+        installation_date: document.getElementById('assetInstallDate').value || null,
+        warranty_expiry: document.getElementById('assetWarrantyExpiry').value || null,
+        client_id: document.getElementById('assetClientId').value || null,
+        site_id: document.getElementById('assetSiteId').value || null,
+        status: document.getElementById('assetStatus').value,
+        notes: document.getElementById('assetNotes').value || null
+      };
+      
+      try {
+        await fetchAPI('/assets', { method: 'POST', body: JSON.stringify(assetData) });
+        showToast('Asset added successfully!', 'success');
+        clearCache();
+        modal.remove();
+        renderApp();
+      } catch (err) {
+        showToast('Error adding asset: ' + err.message, 'error');
+      }
+    };
+  };
+
+  // ============================================================
+  // FIX: ADD SERVICE MODAL
+  // ============================================================
+  window.showAddServiceModal = async () => {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 500px;">
+        <h3>${iconHtml('services')} Add Service</h3>
+        
+        <div>
+          <label>Service Name *</label>
+          <input type="text" id="serviceName" placeholder="e.g., AC Maintenance">
+        </div>
+        <div>
+          <label>Estimated Duration (minutes)</label>
+          <input type="number" id="serviceDuration" value="60" placeholder="e.g., 60">
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn-secondary" id="cancelServiceBtn">Cancel</button>
+          <button class="btn-primary" id="saveServiceBtn">Save Service</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    document.getElementById('cancelServiceBtn').onclick = () => modal.remove();
+    document.getElementById('saveServiceBtn').onclick = async () => {
+      const name = document.getElementById('serviceName').value.trim();
+      
+      if (!name) {
+        showToast('Service name is required', 'error');
+        return;
+      }
+      
+      const serviceData = {
+        name: name,
+        estimated_duration_minutes: parseInt(document.getElementById('serviceDuration').value) || 60
+      };
+      
+      try {
+        await fetchAPI('/services', { method: 'POST', body: JSON.stringify(serviceData) });
+        showToast('Service added successfully!', 'success');
+        clearCache();
+        modal.remove();
+        renderApp();
+      } catch (err) {
+        showToast('Error adding service: ' + err.message, 'error');
+      }
+    };
+  };
+
+  // ============================================================
+  // FIX: ADD QUOTATION MODAL (Complete)
+  // ============================================================
+  window.showAddQuotationModal = async () => {
+    const clients = await fetchWithCache('/clients');
+    const services = await fetchWithCache('/services');
+    
+    let lineItems = [{ description: '', quantity: 1, unit_price: 0 }];
+    
+    function calculateTotals() {
+      const subtotal = lineItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+      const vat = subtotal * 0.05;
+      const total = subtotal + vat;
+      const subtotalEl = document.getElementById('quoteSubtotal');
+      const vatEl = document.getElementById('quoteVat');
+      const totalEl = document.getElementById('quoteTotal');
+      if (subtotalEl) subtotalEl.innerText = `AED ${subtotal.toFixed(2)}`;
+      if (vatEl) vatEl.innerText = `AED ${vat.toFixed(2)}`;
+      if (totalEl) totalEl.innerText = `AED ${total.toFixed(2)}`;
+      return { subtotal, vat, total };
+    }
+    
+    function renderLineItems() {
+      const container = document.getElementById('quoteLineItemsContainer');
+      if (!container) return;
+      container.innerHTML = lineItems.map((item, idx) => `
+        <div class="line-item-row" data-idx="${idx}">
+          <input type="text" class="item-desc" value="${item.description.replace(/"/g, '&quot;')}" placeholder="Service/Product" list="serviceList">
+          <input type="number" class="item-qty" value="${item.quantity}" step="1" min="1">
+          <input type="number" class="item-price" value="${item.unit_price}" step="0.01" min="0">
+          <div class="line-item-total">AED ${(item.quantity * item.unit_price).toFixed(2)}</div>
+          <button class="btn-remove">✕</button>
+        </div>
+      `).join('');
+      
+      const datalist = document.createElement('datalist');
+      datalist.id = 'serviceList';
+      datalist.innerHTML = services.map(s => `<option value="${s.name}">`).join('');
+      container.appendChild(datalist);
+      
+      document.querySelectorAll('.item-desc, .item-qty, .item-price').forEach(el => {
+        el.addEventListener('input', updateTotals);
+      });
+      document.querySelectorAll('.btn-remove').forEach(btn => {
+        btn.addEventListener('click', removeItem);
+      });
+      calculateTotals();
+    }
+    
+    function removeItem(e) {
+      const idx = parseInt(e.target.closest('.line-item-row').dataset.idx);
+      lineItems.splice(idx, 1);
+      if (lineItems.length === 0) {
+        lineItems = [{ description: '', quantity: 1, unit_price: 0 }];
+      }
+      renderLineItems();
+    }
+    
+    function updateTotals() {
+      const rows = document.querySelectorAll('#quoteLineItemsContainer .line-item-row');
+      lineItems = [];
+      rows.forEach(row => {
+        const description = row.querySelector('.item-desc')?.value || '';
+        const quantity = parseFloat(row.querySelector('.item-qty')?.value) || 0;
+        const unitPrice = parseFloat(row.querySelector('.item-price')?.value) || 0;
+        lineItems.push({ description, quantity, unit_price: unitPrice });
+        const totalEl = row.querySelector('.line-item-total');
+        if (totalEl) totalEl.innerText = `AED ${(quantity * unitPrice).toFixed(2)}`;
+      });
+      calculateTotals();
+    }
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 700px;">
+        <h3>${iconHtml('quotations')} Create New Quotation</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+          <div>
+            <label>Client *</label>
+            <select id="quoteClientId">
+              ${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label>Date *</label>
+            <input type="date" id="quoteDate" value="${new Date().toISOString().slice(0,10)}">
+          </div>
+          <div>
+            <label>Valid Until</label>
+            <input type="date" id="quoteValidUntil">
+          </div>
+          <div>
+            <label>Status</label>
+            <select id="quoteStatus">
+              <option value="Draft">Draft</option>
+              <option value="Sent">Sent</option>
+              <option value="Approved">Approved</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="margin-top: 16px;">
+          <div style="font-weight:700; margin-bottom:12px;">Line Items</div>
+          <div class="line-items-header">
+            <span>Description</span>
+            <span>Qty</span>
+            <span>Unit Price</span>
+            <span>Total</span>
+            <span></span>
+          </div>
+          <div id="quoteLineItemsContainer"></div>
+          <button id="addQuoteLineItemBtn" style="width:100%; margin-top:8px; padding:9px; border:1.5px dashed var(--border); border-radius:10px; background:transparent; cursor:pointer;">
+            + Add Line Item
+          </button>
+        </div>
+        
+        <div class="totals-box">
+          <div class="totals-inner">
+            <div class="totals-row"><span>Subtotal</span><span id="quoteSubtotal">AED 0.00</span></div>
+            <div class="totals-row"><span>VAT (5%)</span><span id="quoteVat">AED 0.00</span></div>
+            <div class="totals-row"><span>Total</span><span id="quoteTotal">AED 0.00</span></div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 16px;">
+          <label>Notes</label>
+          <textarea id="quoteNotes" rows="2" placeholder="Additional notes for customer..."></textarea>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn-secondary" id="cancelQuoteBtn">Cancel</button>
+          <button class="btn-primary" id="saveQuoteBtn">Create Quotation</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    renderLineItems();
+    
+    document.getElementById('addQuoteLineItemBtn').onclick = () => {
+      lineItems.push({ description: '', quantity: 1, unit_price: 0 });
+      renderLineItems();
+    };
+    
+    document.getElementById('cancelQuoteBtn').onclick = () => modal.remove();
+    
+    document.getElementById('saveQuoteBtn').onclick = async () => {
+      const client_id = document.getElementById('quoteClientId').value;
+      const client_name = document.getElementById('quoteClientId').options[document.getElementById('quoteClientId').selectedIndex]?.text;
+      const date = document.getElementById('quoteDate').value;
+      const valid_until = document.getElementById('quoteValidUntil').value || null;
+      const status = document.getElementById('quoteStatus').value;
+      const notes = document.getElementById('quoteNotes').value || null;
+      
+      if (!client_id) {
+        showToast('Please select a client', 'error');
+        return;
+      }
+      if (!date) {
+        showToast('Please select a date', 'error');
+        return;
+      }
+      
+      const validItems = lineItems.filter(item => 
+        item.description && item.description.trim() !== '' && 
+        item.quantity > 0 && 
+        item.unit_price > 0
+      );
+      
+      if (validItems.length === 0) {
+        showToast('Add at least one valid line item', 'error');
+        return;
+      }
+      
+      const { subtotal, vat, total } = calculateTotals();
+      
+      try {
+        await fetchAPI('/quotations', {
+          method: 'POST',
+          body: JSON.stringify({
+            client_id,
+            client_name,
+            date,
+            valid_until,
+            status,
+            notes,
+            line_items: validItems.map(item => ({
+              description: item.description,
+              quantity: item.quantity,
+              unit_price: item.unit_price
+            })),
+            subtotal,
+            vat,
+            total
+          })
+        });
+        
+        showToast('Quotation created successfully!', 'success');
+        clearCache();
+        modal.remove();
+        renderApp();
+      } catch (err) {
+        showToast('Error creating quotation: ' + err.message, 'error');
+      }
+    };
+  };
+
+  // ============================================================
+  // HELPER FUNCTIONS (Existing)
+  // ============================================================
   
   window.viewAmcDetails = async (id) => {
-    const amcs = await fetchAPI('/amcs');
+    const amcs = await fetchWithCache('/amcs');
     const amc = amcs.find(a => a.id === id);
     if (!amc) return;
     const visits = await fetchAPI(`/amc-visits/amc/${id}`);
     const sym = user?.currency === 'EUR' ? '€' : 'AED';
     const modal = document.createElement('div'); modal.className = 'modal'; modal.style.display = 'flex';
-    modal.innerHTML = `<div class="modal-content" style="max-width: 650px;"><h3>📄 AMC Contract Details</h3><div style="background: var(--surface-2); padding: 16px; border-radius: 12px; margin-bottom: 20px;"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"><div><strong>Client:</strong> ${amc.client_name}</div><div><strong>Contract Type:</strong> ${amc.contract_type || 'Standard AMC'}</div><div><strong>Contract Value:</strong> ${sym} ${(amc.contract_value || 0).toLocaleString()} / year</div><div><strong>Visits:</strong> ${amc.visits_done || 0} of ${amc.visits_per_year || 4} completed</div><div><strong>Start Date:</strong> ${amc.start_date ? new Date(amc.start_date).toLocaleDateString() : '-'}</div><div><strong>Expiry Date:</strong> ${amc.expiry ? new Date(amc.expiry).toLocaleDateString() : '-'}</div><div><strong>Assigned Tech:</strong> ${amc.technician || 'Unassigned'}</div><div><strong>Status:</strong> ${amc.status || 'Active'}</div></div></div><h4>📝 Visit History</h4><div style="max-height: 300px; overflow-y: auto;">${visits.length === 0 ? '<div class="empty">No visits logged yet</div>' : `<table style="width:100%; font-size:0.8rem;"><thead><tr><th>Date</th><th>Technician</th><th>Tasks</th><th>Hours</th></tr></thead><tbody>${visits.map(v => `<tr><td>${new Date(v.visit_date).toLocaleDateString()}</td><td>${v.technician || '-'}</td><td>${v.tasks_completed?.substring(0, 50) || '-'}${v.tasks_completed?.length > 50 ? '...' : ''}</td><td>${v.hours_spent || '-'}</td></tr>`).join('')}</tbody></table>`}</div><div class="modal-actions"><button class="btn-primary" id="closeDetailsBtn">Close</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content" style="max-width: 650px;"><h3>${iconHtml('amc')} AMC Contract Details</h3><div style="background: var(--surface-2); padding: 16px; border-radius: 12px; margin-bottom: 20px;"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"><div><strong>Client:</strong> ${amc.client_name}</div><div><strong>Contract Type:</strong> ${amc.contract_type || 'Standard AMC'}</div><div><strong>Contract Value:</strong> ${sym} ${(amc.contract_value || 0).toLocaleString()} / year</div><div><strong>Visits:</strong> ${amc.visits_done || 0} of ${amc.visits_per_year || 4} completed</div><div><strong>Start Date:</strong> ${amc.start_date ? new Date(amc.start_date).toLocaleDateString() : '-'}</div><div><strong>Expiry Date:</strong> ${amc.expiry ? new Date(amc.expiry).toLocaleDateString() : '-'}</div><div><strong>Assigned Tech:</strong> ${amc.technician || 'Unassigned'}</div><div><strong>Status:</strong> ${amc.status || 'Active'}</div></div></div><h4>${iconHtml('tasks')} Visit History</h4><div style="max-height: 300px; overflow-y: auto;">${visits.length === 0 ? '<div class="empty">No visits logged yet</div>' : `<table style="width:100%; font-size:0.8rem;"><thead><tr><th>Date</th><th>Technician</th><th>Tasks</th><th>Hours</th></tr></thead><tbody>${visits.map(v => `<tr><td>${new Date(v.visit_date).toLocaleDateString()}</td><td>${v.technician || '-'}</td><td>${v.tasks_completed?.substring(0, 50) || '-'}${v.tasks_completed?.length > 50 ? '...' : ''}</td><td>${v.hours_spent || '-'}</td></tr>`).join('')}</tbody></table>`}</div><div class="modal-actions"><button class="btn-primary" id="closeDetailsBtn">Close</button></div></div>`;
     document.body.appendChild(modal); document.getElementById('closeDetailsBtn').onclick = () => modal.remove();
   };
   
   window.logAmcVisit = async (id) => {
-    const amcs = await fetchAPI('/amcs');
+    const amcs = await fetchWithCache('/amcs');
     const amc = amcs.find(a => a.id === id);
     if (!amc) return;
-    const techs = await fetchAPI('/technicians');
+    const techs = await fetchWithCache('/technicians');
     const visitsDone = amc.visits_done || 0;
     const totalVisits = amc.visits_per_year || 4;
     if (visitsDone >= totalVisits) { showToast(`All ${totalVisits} visits for this year have been completed.`, 'warning'); return; }
     const modal = document.createElement('div'); modal.className = 'modal'; modal.style.display = 'flex';
-    modal.innerHTML = `<div class="modal-content" style="max-width: 550px;"><h3>📝 Log Service Visit</h3><div style="background: var(--surface-2); padding: 12px; border-radius: 12px; margin-bottom: 20px;"><div><strong>Client:</strong> ${amc.client_name}</div><div><strong>Contract:</strong> ${amc.contract_type || 'Standard AMC'}</div><div><strong>Visits Used:</strong> ${visitsDone} of ${totalVisits}</div></div><label>Visit Date *</label><input type="date" id="visitDate" value="${new Date().toISOString().slice(0,10)}"><label>Technician *</label><select id="visitTechnician"><option value="${amc.technician || ''}">${amc.technician || 'Select technician'}</option>${techs.filter(t => t.active).map(t => `<option value="${t.name}">${t.name} — ${t.role || 'Technician'}</option>`).join('')}</select><label>Tasks Completed *</label><textarea id="visitTasks" rows="3" placeholder="e.g., AC filter cleaning..."></textarea><label>Notes</label><textarea id="visitNotes" rows="2" placeholder="Any issues found..."></textarea><label>Hours Spent</label><input type="number" id="visitHours" step="0.5"><div class="modal-actions"><button class="btn-secondary" id="cancelVisitBtn">Cancel</button><button class="btn-primary" id="saveVisitBtn">Save Visit</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content" style="max-width: 550px;"><h3>${iconHtml('tasks')} Log Service Visit</h3><div style="background: var(--surface-2); padding: 12px; border-radius: 12px; margin-bottom: 20px;"><div><strong>Client:</strong> ${amc.client_name}</div><div><strong>Contract:</strong> ${amc.contract_type || 'Standard AMC'}</div><div><strong>Visits Used:</strong> ${visitsDone} of ${totalVisits}</div></div><label>Visit Date *</label><input type="date" id="visitDate" value="${new Date().toISOString().slice(0,10)}"><label>Technician *</label><select id="visitTechnician"><option value="${amc.technician || ''}">${amc.technician || 'Select technician'}</option>${techs.filter(t => t.active).map(t => `<option value="${t.name}">${t.name} — ${t.role || 'Technician'}</option>`).join('')}</select><label>Tasks Completed *</label><textarea id="visitTasks" rows="3" placeholder="e.g., AC filter cleaning..."></textarea><label>Notes</label><textarea id="visitNotes" rows="2" placeholder="Any issues found..."></textarea><label>Hours Spent</label><input type="number" id="visitHours" step="0.5"><div class="modal-actions"><button class="btn-secondary" id="cancelVisitBtn">Cancel</button><button class="btn-primary" id="saveVisitBtn">Save Visit</button></div></div>`;
     document.body.appendChild(modal);
     document.getElementById('cancelVisitBtn').onclick = () => modal.remove();
     document.getElementById('saveVisitBtn').onclick = async () => {
@@ -976,20 +1930,21 @@
         const newVisitsDone = visitsDone + 1;
         await fetchAPI(`/amcs/${id}`, { method: 'PUT', body: JSON.stringify({ visits_done: newVisitsDone, last_visit_date: visitDate, technician }) });
         showToast(`Visit ${newVisitsDone} of ${totalVisits} completed!`, 'success');
+        clearCache();
         modal.remove(); renderApp();
       } catch (err) { showToast('Error saving visit: ' + err.message, 'error'); }
     };
   };
   
   window.renewAmcContract = async (id) => {
-    const amcs = await fetchAPI('/amcs');
+    const amcs = await fetchWithCache('/amcs');
     const oldAmc = amcs.find(a => a.id === id);
     if (!oldAmc) return;
-    const clients = await fetchAPI('/clients');
-    const techs = await fetchAPI('/technicians');
-    const sites = await fetchAPI('/sites');
+    const clients = await fetchWithCache('/clients');
+    const techs = await fetchWithCache('/technicians');
+    const sites = await fetchWithCache('/sites');
     const modal = document.createElement('div'); modal.className = 'modal'; modal.style.display = 'flex';
-    modal.innerHTML = `<div class="modal-content" style="max-width: 550px;"><h3>🔄 Renew AMC Contract</h3><div style="background: var(--surface-2); padding: 12px; border-radius: 12px; margin-bottom: 20px;"><div><strong>Original:</strong> ${oldAmc.client_name}</div><div><strong>Expiry:</strong> ${oldAmc.expiry ? new Date(oldAmc.expiry).toLocaleDateString() : '-'}</div></div><label>Client</label><select id="amcClientId">${clients.map(c => `<option value="${c.id}" ${c.name === oldAmc.client_name ? 'selected' : ''}>${c.name}</option>`).join('')}</select><label>Site</label><select id="amcSiteId"><option value="">None</option>${sites.filter(s => s.customer_id === oldAmc.client_id).map(s => `<option value="${s.id}" ${s.id === oldAmc.site_id ? 'selected' : ''}>${s.name}</option>`).join('')}</select><label>Contract Type</label><select id="amcContractType"><option value="">Select</option><option value="HVAC" ${oldAmc.contract_type === 'HVAC' ? 'selected' : ''}>HVAC</option><option value="MEP" ${oldAmc.contract_type === 'MEP' ? 'selected' : ''}>MEP</option><option value="Electrical" ${oldAmc.contract_type === 'Electrical' ? 'selected' : ''}>Electrical</option><option value="Plumbing" ${oldAmc.contract_type === 'Plumbing' ? 'selected' : ''}>Plumbing</option><option value="Full Facility" ${oldAmc.contract_type === 'Full Facility' ? 'selected' : ''}>Full Facility</option></select><label>Value (AED)</label><input type="number" id="amcValue" step="0.01" value="${oldAmc.contract_value || ''}"><label>Start Date</label><input type="date" id="amcStart" value="${new Date().toISOString().slice(0,10)}"><label>Expiry Date</label><input type="date" id="amcExpiry" value="${oldAmc.expiry ? new Date(new Date(oldAmc.expiry).setFullYear(new Date(oldAmc.expiry).getFullYear() + 1)).toISOString().slice(0,10) : ''}"><label>Visits/Year</label><select id="amcVisits"><option value="4" ${oldAmc.visits_per_year === 4 ? 'selected' : ''}>4</option><option value="6" ${oldAmc.visits_per_year === 6 ? 'selected' : ''}>6</option><option value="12" ${oldAmc.visits_per_year === 12 ? 'selected' : ''}>12</option><option value="24" ${oldAmc.visits_per_year === 24 ? 'selected' : ''}>24</option></select><label>Technician</label><select id="amcTechnician"><option value="">Select</option>${techs.map(t => `<option value="${t.name}" ${t.name === oldAmc.technician ? 'selected' : ''}>${t.name}</option>`).join('')}</select><label>Notes</label><textarea id="amcNotes" rows="2">${oldAmc.notes || ''}</textarea><div class="modal-actions"><button class="btn-secondary" id="cancelRenewBtn">Cancel</button><button class="btn-primary" id="saveRenewBtn">Create</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content" style="max-width: 550px;"><h3>${iconHtml('amc')} Renew AMC Contract</h3><div style="background: var(--surface-2); padding: 12px; border-radius: 12px; margin-bottom: 20px;"><div><strong>Original:</strong> ${oldAmc.client_name}</div><div><strong>Expiry:</strong> ${oldAmc.expiry ? new Date(oldAmc.expiry).toLocaleDateString() : '-'}</div></div><label>Client</label><select id="amcClientId">${clients.map(c => `<option value="${c.id}" ${c.name === oldAmc.client_name ? 'selected' : ''}>${c.name}</option>`).join('')}</select><label>Site</label><select id="amcSiteId"><option value="">None</option>${sites.filter(s => s.customer_id === oldAmc.client_id).map(s => `<option value="${s.id}" ${s.id === oldAmc.site_id ? 'selected' : ''}>${s.name}</option>`).join('')}</select><label>Contract Type</label><select id="amcContractType"><option value="">Select</option><option value="HVAC" ${oldAmc.contract_type === 'HVAC' ? 'selected' : ''}>HVAC</option><option value="MEP" ${oldAmc.contract_type === 'MEP' ? 'selected' : ''}>MEP</option><option value="Electrical" ${oldAmc.contract_type === 'Electrical' ? 'selected' : ''}>Electrical</option><option value="Plumbing" ${oldAmc.contract_type === 'Plumbing' ? 'selected' : ''}>Plumbing</option><option value="Full Facility" ${oldAmc.contract_type === 'Full Facility' ? 'selected' : ''}>Full Facility</option></select><label>Value (AED)</label><input type="number" id="amcValue" step="0.01" value="${oldAmc.contract_value || ''}"><label>Start Date</label><input type="date" id="amcStart" value="${new Date().toISOString().slice(0,10)}"><label>Expiry Date</label><input type="date" id="amcExpiry" value="${oldAmc.expiry ? new Date(new Date(oldAmc.expiry).setFullYear(new Date(oldAmc.expiry).getFullYear() + 1)).toISOString().slice(0,10) : ''}"><label>Visits/Year</label><select id="amcVisits"><option value="4" ${oldAmc.visits_per_year === 4 ? 'selected' : ''}>4</option><option value="6" ${oldAmc.visits_per_year === 6 ? 'selected' : ''}>6</option><option value="12" ${oldAmc.visits_per_year === 12 ? 'selected' : ''}>12</option><option value="24" ${oldAmc.visits_per_year === 24 ? 'selected' : ''}>24</option></select><label>Technician</label><select id="amcTechnician"><option value="">Select</option>${techs.map(t => `<option value="${t.name}" ${t.name === oldAmc.technician ? 'selected' : ''}>${t.name}</option>`).join('')}</select><label>Notes</label><textarea id="amcNotes" rows="2">${oldAmc.notes || ''}</textarea><div class="modal-actions"><button class="btn-secondary" id="cancelRenewBtn">Cancel</button><button class="btn-primary" id="saveRenewBtn">Create</button></div></div>`;
     document.body.appendChild(modal);
     const clientSelect = document.getElementById('amcClientId');
     const siteSelect = document.getElementById('amcSiteId');
@@ -1003,6 +1958,7 @@
       if (!clientId || !startDate || !expiry) { showToast('Please fill all required fields', 'error'); return; }
       await fetchAPI('/amcs', { method: 'POST', body: JSON.stringify({ clientId, clientName, site_id: document.getElementById('amcSiteId').value || null, contract_type: document.getElementById('amcContractType').value, contract_value: parseFloat(document.getElementById('amcValue').value) || null, start_date: startDate, expiry, visits_per_year: parseInt(document.getElementById('amcVisits').value), technician: document.getElementById('amcTechnician').value || null, notes: `Renewed from ${oldAmc.id}. ${document.getElementById('amcNotes').value || ''}`, status: 'Active', visits_done: 0 }) });
       showToast('New renewal contract created!', 'success');
+      clearCache();
       modal.remove(); renderApp();
     };
   };
@@ -1037,7 +1993,7 @@
     const invoice = await fetchAPI(`/invoices/${id}`);
     const sym = user?.currency === 'EUR' ? '€' : 'AED';
     const modal = document.createElement('div'); modal.className = 'modal'; modal.style.display = 'flex';
-    modal.innerHTML = `<div class="modal-content" style="max-width: 600px;"><h3>🧾 Invoice Details</h3><div style="background: var(--surface-2); padding: 16px; border-radius: 12px; margin-bottom: 20px;"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"><div><strong>Invoice #:</strong> ${invoice.invoice_number}</div><div><strong>Client:</strong> ${invoice.client_name}</div><div><strong>Issue Date:</strong> ${invoice.date ? new Date(invoice.date).toLocaleDateString() : '-'}</div><div><strong>Due Date:</strong> ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : '-'}</div><div><strong>Reference:</strong> ${invoice.reference || '-'}</div><div><strong>Payment Terms:</strong> ${invoice.payment_terms || '-'}</div><div><strong>TRN:</strong> ${invoice.trn_number || '-'}</div><div><strong>Status:</strong> ${invoice.status || 'Pending'}</div></div></div><h4>Line Items</h4><div style="max-height: 250px;">${invoice.line_items && invoice.line_items.length > 0 ? `<table style="width:100%;"><thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead><tbody>${invoice.line_items.map(item => `<tr><td>${item.description}</td><td>${item.quantity}</td><td>${sym} ${item.unit_price}</td><td>${sym} ${item.total}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">No line items</div>'}</div><div style="margin-top: 16px; text-align: right;"><div><strong>Subtotal:</strong> ${sym} ${(invoice.subtotal || invoice.amount || 0).toLocaleString()}</div><div><strong>VAT (5%):</strong> ${sym} ${(invoice.vat_amount || (invoice.amount * 0.05)).toLocaleString()}</div><div style="font-size: 1.1rem;"><strong>Total:</strong> ${sym} ${(invoice.amount || invoice.total || 0).toLocaleString()}</div></div><div class="modal-actions"><button class="btn-primary" id="closeDetailsBtn">Close</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content" style="max-width: 600px;"><h3>${iconHtml('invoices')} Invoice Details</h3><div style="background: var(--surface-2); padding: 16px; border-radius: 12px; margin-bottom: 20px;"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"><div><strong>Invoice #:</strong> ${invoice.invoice_number}</div><div><strong>Client:</strong> ${invoice.client_name}</div><div><strong>Issue Date:</strong> ${invoice.date ? new Date(invoice.date).toLocaleDateString() : '-'}</div><div><strong>Due Date:</strong> ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : '-'}</div><div><strong>Reference:</strong> ${invoice.reference || '-'}</div><div><strong>Payment Terms:</strong> ${invoice.payment_terms || '-'}</div><div><strong>TRN:</strong> ${invoice.trn_number || '-'}</div><div><strong>Status:</strong> ${invoice.status || 'Pending'}</div></div></div><h4>${iconHtml('tasks')} Line Items</h4><div style="max-height: 250px;">${invoice.line_items && invoice.line_items.length > 0 ? `<table style="width:100%;"><thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th class="amount-cell">Total</th></tr></thead><tbody>${invoice.line_items.map(item => `<tr><td>${item.description}</td><td>${item.quantity}</td><td>${sym} ${item.unit_price}</td><td class="amount-cell">${sym} ${item.total}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">No line items</div>'}</div><div style="margin-top: 16px; text-align: right;"><div><strong>Subtotal:</strong> ${sym} ${(invoice.subtotal || invoice.amount || 0).toLocaleString()}</div><div><strong>VAT (5%):</strong> ${sym} ${(invoice.vat_amount || (invoice.amount * 0.05)).toLocaleString()}</div><div style="font-size: 1.1rem;"><strong>Total:</strong> ${sym} ${(invoice.amount || invoice.total || 0).toLocaleString()}</div></div><div class="modal-actions"><button class="btn-primary" id="closeDetailsBtn">Close</button></div></div>`;
     document.body.appendChild(modal); document.getElementById('closeDetailsBtn').onclick = () => modal.remove();
   };
   
@@ -1045,6 +2001,7 @@
     if (confirm('Mark this invoice as paid?')) {
       await fetchAPI(`/invoices/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: 'Paid' }) });
       showToast('Invoice marked as paid!', 'success');
+      clearCache();
       renderApp();
     }
   };
@@ -1052,9 +2009,9 @@
   window.viewCustomerProfile = async (id) => {
     try {
       const customer = await fetchAPI(`/clients/${id}`);
-      const jobsData = await fetchAPI('/jobs');
-      const amcsData = await fetchAPI('/amcs');
-      const invoicesData = await fetchAPI('/invoices');
+      const jobsData = await fetchWithCache('/jobs');
+      const amcsData = await fetchWithCache('/amcs');
+      const invoicesData = await fetchWithCache('/invoices');
       const ticketsCount = jobsData.filter(j => j.customer_id === id || j.customer_name === customer.name).length;
       const amcsCount = amcsData.filter(a => a.client_id === id || a.client_name === customer.name).length;
       const revenue = invoicesData.filter(i => i.client_name === customer.name).reduce((sum, inv) => sum + (inv.amount || inv.total || 0), 0);
@@ -1076,48 +2033,51 @@
       await fetchAPI(`/jobs/${jobId}`, { method: 'PUT', body: JSON.stringify({ status: newStatus }) });
       showToast(`Task marked as ${newStatus}`, 'success');
     }
+    clearCache();
     renderApp();
   };
   
   window.viewTaskDetails = async (jobId) => {
-    const jobs = await fetchAPI('/jobs');
+    const jobs = await fetchWithCache('/jobs');
     const job = jobs.find(j => j.id === jobId);
     if (!job) return;
     const modal = document.createElement('div'); modal.className = 'modal'; modal.style.display = 'flex';
-    modal.innerHTML = `<div class="modal-content" style="max-width: 500px;"><h3>📋 Task Details</h3><div style="background: var(--surface-2); padding: 16px; border-radius: 12px;"><div><strong>Customer:</strong> ${job.customer_name || '-'}</div><div><strong>Service:</strong> ${job.service || '-'}</div><div><strong>Technician:</strong> ${job.technician || 'Unassigned'}</div><div><strong>Priority:</strong> ${job.priority || 'Medium'}</div><div><strong>Status:</strong> ${job.status || 'Pending'}</div><div><strong>Description:</strong> ${job.description || 'No description'}</div></div><div class="modal-actions"><button class="btn-primary" id="closeTaskDetails">Close</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content" style="max-width: 500px;"><h3>${iconHtml('tasks')} Task Details</h3><div style="background: var(--surface-2); padding: 16px; border-radius: 12px;"><div><strong>Customer:</strong> ${job.customer_name || '-'}</div><div><strong>Service:</strong> ${job.service || '-'}</div><div><strong>Technician:</strong> ${job.technician || 'Unassigned'}</div><div><strong>Priority:</strong> ${job.priority || 'Medium'}</div><div><strong>Status:</strong> ${job.status || 'Pending'}</div><div><strong>Description:</strong> ${job.description || 'No description'}</div></div><div class="modal-actions"><button class="btn-primary" id="closeTaskDetails">Close</button></div></div>`;
     document.body.appendChild(modal); document.getElementById('closeTaskDetails').onclick = () => modal.remove();
   };
   
   window.editCustomer = async (id) => {
     const customer = await fetchAPI(`/clients/${id}`);
     const modal = document.createElement('div'); modal.className = 'modal'; modal.style.display = 'flex';
-    modal.innerHTML = `<div class="modal-content" style="max-width: 700px;"><h3>✏️ Edit Customer</h3><div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;"><div><label>Customer Name *</label><input type="text" id="editName" value="${customer.name || ''}"></div><div><label>Customer Type</label><select id="editType"><option value="">Select</option><option value="Residential" ${customer.customer_type === 'Residential' ? 'selected' : ''}>Residential</option><option value="Commercial" ${customer.customer_type === 'Commercial' ? 'selected' : ''}>Commercial</option><option value="Industrial" ${customer.customer_type === 'Industrial' ? 'selected' : ''}>Industrial</option><option value="Hospitality" ${customer.customer_type === 'Hospitality' ? 'selected' : ''}>Hospitality</option></select></div><div><label>Contact Person</label><input type="text" id="editContact" value="${customer.contact || ''}"></div><div><label>Phone Number</label><input type="text" id="editPhone" value="${customer.phone || ''}"></div><div><label>WhatsApp</label><input type="text" id="editWhatsapp" value="${customer.whatsapp || ''}"></div><div><label>Email</label><input type="email" id="editEmail" value="${customer.email || ''}"></div><div><label>Area</label><input type="text" id="editArea" value="${customer.area || ''}"></div><div><label>City</label><input type="text" id="editCity" value="${customer.city || ''}"></div><div><label>Country</label><select id="editCountry"><option value="UAE" ${customer.country === 'UAE' ? 'selected' : ''}>UAE</option><option value="Estonia" ${customer.country === 'Estonia' ? 'selected' : ''}>Estonia</option></select></div><div><label>Postal Code</label><input type="text" id="editPostal" value="${customer.postal_code || ''}"></div><div><label>Address</label><textarea id="editAddress" rows="2">${customer.address || ''}</textarea></div><div><label>TRN/VAT</label><input type="text" id="editTax" value="${customer.trn_number || customer.vat_number || ''}"></div><div><label>Currency</label><select id="editCurrency"><option value="AED" ${customer.currency === 'AED' ? 'selected' : ''}>AED</option><option value="EUR" ${customer.currency === 'EUR' ? 'selected' : ''}>EUR</option></select></div><div><label>Notes</label><textarea id="editNotes" rows="2">${customer.notes || ''}</textarea></div><div><label>Status</label><select id="editStatus"><option value="active" ${customer.status === 'active' ? 'selected' : ''}>Active</option><option value="inactive" ${customer.status === 'inactive' ? 'selected' : ''}>Inactive</option></select></div></div><div class="modal-actions"><button class="btn-secondary" id="cancelEditBtn">Cancel</button><button class="btn-primary" id="saveEditBtn">Save</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content" style="max-width: 700px;"><h3>${iconHtml('customers')} Edit Customer</h3><div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;"><div><label>Customer Name *</label><input type="text" id="editName" value="${customer.name || ''}"></div><div><label>Customer Type</label><select id="editType"><option value="">Select</option><option value="Residential" ${customer.customer_type === 'Residential' ? 'selected' : ''}>Residential</option><option value="Commercial" ${customer.customer_type === 'Commercial' ? 'selected' : ''}>Commercial</option><option value="Industrial" ${customer.customer_type === 'Industrial' ? 'selected' : ''}>Industrial</option><option value="Hospitality" ${customer.customer_type === 'Hospitality' ? 'selected' : ''}>Hospitality</option></select></div><div><label>Contact Person</label><input type="text" id="editContact" value="${customer.contact || ''}"></div><div><label>Phone Number</label><input type="text" id="editPhone" value="${customer.phone || ''}"></div><div><label>WhatsApp</label><input type="text" id="editWhatsapp" value="${customer.whatsapp || ''}"></div><div><label>Email</label><input type="email" id="editEmail" value="${customer.email || ''}"></div><div><label>Area</label><input type="text" id="editArea" value="${customer.area || ''}"></div><div><label>City</label><input type="text" id="editCity" value="${customer.city || ''}"></div><div><label>Country</label><select id="editCountry"><option value="UAE" ${customer.country === 'UAE' ? 'selected' : ''}>UAE</option><option value="Estonia" ${customer.country === 'Estonia' ? 'selected' : ''}>Estonia</option></select></div><div><label>Postal Code</label><input type="text" id="editPostal" value="${customer.postal_code || ''}"></div><div><label>Address</label><textarea id="editAddress" rows="2">${customer.address || ''}</textarea></div><div><label>TRN/VAT</label><input type="text" id="editTax" value="${customer.trn_number || customer.vat_number || ''}"></div><div><label>Currency</label><select id="editCurrency"><option value="AED" ${customer.currency === 'AED' ? 'selected' : ''}>AED</option><option value="EUR" ${customer.currency === 'EUR' ? 'selected' : ''}>EUR</option></select></div><div><label>Notes</label><textarea id="editNotes" rows="2">${customer.notes || ''}</textarea></div><div><label>Status</label><select id="editStatus"><option value="active" ${customer.status === 'active' ? 'selected' : ''}>Active</option><option value="inactive" ${customer.status === 'inactive' ? 'selected' : ''}>Inactive</option></select></div></div><div class="modal-actions"><button class="btn-secondary" id="cancelEditBtn">Cancel</button><button class="btn-primary" id="saveEditBtn">Save</button></div></div>`;
     document.body.appendChild(modal);
     document.getElementById('cancelEditBtn').onclick = () => modal.remove();
     document.getElementById('saveEditBtn').onclick = async () => {
       await fetchAPI(`/clients/${id}`, { method: 'PUT', body: JSON.stringify({ name: document.getElementById('editName').value, customer_type: document.getElementById('editType').value || null, contact: document.getElementById('editContact').value || null, phone: document.getElementById('editPhone').value || null, whatsapp: document.getElementById('editWhatsapp').value || null, email: document.getElementById('editEmail').value || null, area: document.getElementById('editArea').value || null, city: document.getElementById('editCity').value || null, country: document.getElementById('editCountry').value, postal_code: document.getElementById('editPostal').value || null, address: document.getElementById('editAddress').value || null, trn_number: document.getElementById('editTax').value || null, currency: document.getElementById('editCurrency').value, notes: document.getElementById('editNotes').value || null, status: document.getElementById('editStatus').value }) });
       showToast('Customer updated!', 'success');
+      clearCache();
       modal.remove(); renderApp();
     };
   };
   
   window.showAddCustomerModal = async () => {
     const modal = document.createElement('div'); modal.className = 'modal';
-    modal.innerHTML = `<div class="modal-content"><h3>➕ Add New Customer</h3><label>Customer Name *</label><input type="text" id="custName" placeholder="e.g., Al Noor Villa"><label>Contact Person</label><input type="text" id="custContact" placeholder="e.g., Ahmed"><label>Email</label><input type="email" id="custEmail" placeholder="email@example.com"><label>Phone</label><input type="text" id="custPhone" placeholder="+971 50 123 4567"><label>Address</label><textarea id="custAddress" rows="2" placeholder="Full address"></textarea><label>Currency</label><select id="custCurrency"><option value="AED">AED - UAE Dirham</option><option value="EUR">EUR - Euro</option></select><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Save Customer</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content"><h3>${iconHtml('customers')} Add New Customer</h3><label>Customer Name *</label><input type="text" id="custName" placeholder="e.g., Al Noor Villa"><label>Contact Person</label><input type="text" id="custContact" placeholder="e.g., Ahmed"><label>Email</label><input type="email" id="custEmail" placeholder="email@example.com"><label>Phone</label><input type="text" id="custPhone" placeholder="+971 50 123 4567"><label>Address</label><textarea id="custAddress" rows="2" placeholder="Full address"></textarea><label>Currency</label><select id="custCurrency"><option value="AED">AED - UAE Dirham</option><option value="EUR">EUR - Euro</option></select><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Save Customer</button></div></div>`;
     document.body.appendChild(modal);
     document.getElementById('cancelBtn').onclick = () => modal.remove();
     document.getElementById('saveBtn').onclick = async () => {
       const name = document.getElementById('custName').value;
       if (!name) { showToast('Customer name required', 'error'); return; }
       await fetchAPI('/clients', { method: 'POST', body: JSON.stringify({ name, contact: document.getElementById('custContact').value, email: document.getElementById('custEmail').value, phone: document.getElementById('custPhone').value, address: document.getElementById('custAddress').value, currency: document.getElementById('custCurrency').value }) });
+      clearCache();
       modal.remove(); renderApp();
     };
   };
 
   window.showAddSiteModal = async () => {
-    const clients = await fetchAPI('/clients');
+    const clients = await fetchWithCache('/clients');
     const modal = document.createElement('div'); modal.className = 'modal';
-    modal.innerHTML = `<div class="modal-content"><h3>📍 Add New Site</h3><label>Customer *</label><select id="siteCustomerId">${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select><label>Site Name *</label><input type="text" id="siteName" placeholder="e.g., Main Office"><label>Address</label><textarea id="siteAddress" rows="2"></textarea><label>Contact Person</label><input type="text" id="siteContact"><label>Phone</label><input type="text" id="sitePhone"><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Save Site</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content"><h3>${iconHtml('sites')} Add New Site</h3><label>Customer *</label><select id="siteCustomerId">${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select><label>Site Name *</label><input type="text" id="siteName" placeholder="e.g., Main Office"><label>Address</label><textarea id="siteAddress" rows="2"></textarea><label>Contact Person</label><input type="text" id="siteContact"><label>Phone</label><input type="text" id="sitePhone"><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Save Site</button></div></div>`;
     document.body.appendChild(modal);
     document.getElementById('cancelBtn').onclick = () => modal.remove();
     document.getElementById('saveBtn').onclick = async () => {
@@ -1125,17 +2085,20 @@
       const name = document.getElementById('siteName').value;
       if (!name) { showToast('Site name required', 'error'); return; }
       await fetchAPI('/sites', { method: 'POST', body: JSON.stringify({ customer_id, name, address: document.getElementById('siteAddress').value, contact_person: document.getElementById('siteContact').value, phone: document.getElementById('sitePhone').value }) });
+      clearCache();
       modal.remove(); renderApp();
     };
   };
 
   window.showAddJobModal = async () => {
-    const clients = await fetchAPI('/clients');
-    const techs = await fetchAPI('/technicians');
-    const sites = await fetchAPI('/sites');
-    const services = await fetchAPI('/services');
+    const [clients, techs, sites, services] = await Promise.all([
+      fetchWithCache('/clients'),
+      fetchWithCache('/technicians'),
+      fetchWithCache('/sites'),
+      fetchWithCache('/services')
+    ]);
     const modal = document.createElement('div'); modal.className = 'modal';
-    modal.innerHTML = `<div class="modal-content"><h3>➕ Create New Job</h3><label>Customer *</label><select id="jobCustomerId">${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select><label>Site</label><select id="jobSiteId"><option value="">None</option></select><label>Service *</label><input type="text" id="jobService" list="serviceList" placeholder="e.g., AC Maintenance"><datalist id="serviceList">${services.map(s => `<option value="${s.name}">`).join('')}</datalist><label>Technician</label><select id="jobTechnician"><option value="">Unassigned</option>${techs.map(t => `<option value="${t.name}">${t.name}</option>`).join('')}</select><label>Priority</label><select id="jobPriority"><option>High</option><option selected>Medium</option><option>Low</option></select><label>Status</label><select id="jobStatus"><option>Assigned</option><option>In Progress</option><option>Completed</option></select><label>Description</label><textarea id="jobDesc" rows="2"></textarea><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Create Job</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content"><h3>${iconHtml('plus')} Create New Job</h3><label>Customer *</label><select id="jobCustomerId">${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select><label>Site</label><select id="jobSiteId"><option value="">None</option></select><label>Service *</label><input type="text" id="jobService" list="serviceList" placeholder="e.g., AC Maintenance"><datalist id="serviceList">${services.map(s => `<option value="${s.name}">`).join('')}</datalist><label>Technician</label><select id="jobTechnician"><option value="">Unassigned</option>${techs.map(t => `<option value="${t.name}">${t.name}</option>`).join('')}</select><label>Priority</label><select id="jobPriority"><option>High</option><option selected>Medium</option><option>Low</option></select><label>Status</label><select id="jobStatus"><option>Assigned</option><option>In Progress</option><option>Completed</option></select><label>Description</label><textarea id="jobDesc" rows="2"></textarea><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Create Job</button></div></div>`;
     document.body.appendChild(modal);
     const customerSelect = document.getElementById('jobCustomerId');
     const siteSelect = document.getElementById('jobSiteId');
@@ -1148,13 +2111,14 @@
       const service = document.getElementById('jobService').value;
       if (!customerId || !service) { showToast('Customer and Service required', 'error'); return; }
       await fetchAPI('/jobs', { method: 'POST', body: JSON.stringify({ customerId, customerName, site_id: document.getElementById('jobSiteId').value || null, service, technician: document.getElementById('jobTechnician').value || null, priority: document.getElementById('jobPriority').value, status: document.getElementById('jobStatus').value, description: document.getElementById('jobDesc').value }) });
+      clearCache();
       modal.remove(); renderApp();
     };
   };
 
   window.showAddInvoiceModal = async () => {
-    const clients = await fetchAPI('/clients');
-    const services = await fetchAPI('/services');
+    const clients = await fetchWithCache('/clients');
+    const services = await fetchWithCache('/services');
     let lineItems = [{ description: '', quantity: 1, unit_price: 0 }];
     
     function calculateTotals() {
@@ -1201,7 +2165,7 @@
     }
     
     const modal = document.createElement('div'); modal.className = 'modal'; modal.style.display = 'flex';
-    modal.innerHTML = `<div class="modal-content" style="max-width: 700px;"><h3>🧾 Create New Invoice</h3><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;"><div><label>Client *</label><select id="invClientId">${clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('')}</select></div><div><label>Issue Date *</label><input type="date" id="invDate" value="${new Date().toISOString().slice(0,10)}"></div><div><label>Due Date</label><input type="date" id="invDueDate"></div><div><label>Reference</label><input type="text" id="invRef" placeholder="Ticket/AMC #"></div><div><label>Payment Terms</label><select id="invTerms"><option>Due on Receipt</option><option>Net 7 Days</option><option>Net 14 Days</option><option>Net 30 Days</option></select></div><div><label>TRN Number</label><input type="text" id="invTrn" placeholder="Your TRN"></div></div><div style="margin-top: 16px;"><div style="font-weight:700; margin-bottom:12px;">Line Items</div><div class="line-items-header"><span>Description</span><span>Qty</span><span>Unit Price</span><span>Total</span><span></span></div><div id="lineItemsContainer"></div><button id="addLineItemBtn" style="width:100%; margin-top:8px; padding:9px; border:1.5px dashed var(--border); border-radius:10px; background:transparent; cursor:pointer;">+ Add Line Item</button></div><div class="totals-box"><div class="totals-inner"><div class="totals-row"><span>Subtotal</span><span id="subtotalAmount">AED 0.00</span></div><div class="totals-row"><span>VAT (5%)</span><span id="vatAmount">AED 0.00</span></div><div class="totals-row"><span>Total</span><span id="totalAmount">AED 0.00</span></div></div></div><div class="modal-actions" style="margin-top: 20px;"><button class="btn-secondary" id="cancelInvBtn">Cancel</button><button class="btn-primary" id="saveInvBtn">Create Invoice</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content" style="max-width: 700px;"><h3>${iconHtml('invoices')} Create New Invoice</h3><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;"><div><label>Client *</label><select id="invClientId">${clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('')}</select></div><div><label>Issue Date *</label><input type="date" id="invDate" value="${new Date().toISOString().slice(0,10)}"></div><div><label>Due Date</label><input type="date" id="invDueDate"></div><div><label>Reference</label><input type="text" id="invRef" placeholder="Ticket/AMC #"></div><div><label>Payment Terms</label><select id="invTerms"><option>Due on Receipt</option><option>Net 7 Days</option><option>Net 14 Days</option><option>Net 30 Days</option></select></div><div><label>TRN Number</label><input type="text" id="invTrn" placeholder="Your TRN"></div></div><div style="margin-top: 16px;"><div style="font-weight:700; margin-bottom:12px;">Line Items</div><div class="line-items-header"><span>Description</span><span>Qty</span><span>Unit Price</span><span>Total</span><span></span></div><div id="lineItemsContainer"></div><button id="addLineItemBtn" style="width:100%; margin-top:8px; padding:9px; border:1.5px dashed var(--border); border-radius:10px; background:transparent; cursor:pointer;">+ Add Line Item</button></div><div class="totals-box"><div class="totals-inner"><div class="totals-row"><span>Subtotal</span><span id="subtotalAmount">AED 0.00</span></div><div class="totals-row"><span>VAT (5%)</span><span id="vatAmount">AED 0.00</span></div><div class="totals-row"><span>Total</span><span id="totalAmount">AED 0.00</span></div></div></div><div class="modal-actions" style="margin-top: 20px;"><button class="btn-secondary" id="cancelInvBtn">Cancel</button><button class="btn-primary" id="saveInvBtn">Create Invoice</button></div></div>`;
     document.body.appendChild(modal);
     renderLineItems();
     document.getElementById('addLineItemBtn').onclick = () => { lineItems.push({ description: '', quantity: 1, unit_price: 0 }); renderLineItems(); };
@@ -1220,29 +2184,33 @@
       const { subtotal, vat, total } = calculateTotals();
       await fetchAPI('/invoices', { method: 'POST', body: JSON.stringify({ client_name, date: issueDate, due_date: dueDate || null, reference: reference || null, payment_terms: paymentTerms, trn_number: trnNumber, line_items: validItems.map(item => ({ description: item.description, quantity: item.quantity, unit_price: item.unit_price })), subtotal, vat_amount: vat, total, status: 'Pending' }) });
       showToast('Invoice created!', 'success');
+      clearCache();
       modal.remove(); renderApp();
     };
   };
 
   window.showAddTechnicianModal = async () => {
     const modal = document.createElement('div'); modal.className = 'modal';
-    modal.innerHTML = `<div class="modal-content"><h3>🔧 Add Technician</h3><label>Full Name *</label><input type="text" id="techName" placeholder="e.g., Ahmed K."><label>Role</label><input type="text" id="techRole" placeholder="e.g., HVAC Specialist"><label>Email</label><input type="email" id="techEmail"><label>Phone</label><input type="text" id="techPhone"><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Save</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content"><h3>${iconHtml('technicians')} Add Technician</h3><label>Full Name *</label><input type="text" id="techName" placeholder="e.g., Ahmed K."><label>Role</label><input type="text" id="techRole" placeholder="e.g., HVAC Specialist"><label>Email</label><input type="email" id="techEmail"><label>Phone</label><input type="text" id="techPhone"><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Save</button></div></div>`;
     document.body.appendChild(modal);
     document.getElementById('cancelBtn').onclick = () => modal.remove();
     document.getElementById('saveBtn').onclick = async () => {
       const name = document.getElementById('techName').value;
       if (!name) { showToast('Technician name required', 'error'); return; }
       await fetchAPI('/technicians', { method: 'POST', body: JSON.stringify({ name, role: document.getElementById('techRole').value, email: document.getElementById('techEmail').value, phone: document.getElementById('techPhone').value, active: true }) });
+      clearCache();
       modal.remove(); renderApp();
     };
   };
 
   window.showAddAmcModal = async () => {
-    const clients = await fetchAPI('/clients');
-    const sites = await fetchAPI('/sites');
-    const techs = await fetchAPI('/technicians');
+    const [clients, sites, techs] = await Promise.all([
+      fetchWithCache('/clients'),
+      fetchWithCache('/sites'),
+      fetchWithCache('/technicians')
+    ]);
     const modal = document.createElement('div'); modal.className = 'modal';
-    modal.innerHTML = `<div class="modal-content"><h3>📑 New AMC Contract</h3><label>Client *</label><select id="amcClientId">${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select><label>Site</label><select id="amcSiteId"><option value="">None</option></select><label>Contract Type</label><select id="amcContractType"><option value="">Select</option><option>HVAC</option><option>MEP</option><option>Electrical</option><option>Plumbing</option><option>Full Facility</option></select><label>Contract Value (AED)</label><input type="number" id="amcValue" step="0.01"><label>Start Date *</label><input type="date" id="amcStart" value="${new Date().toISOString().slice(0,10)}"><label>Expiry Date *</label><input type="date" id="amcExpiry"><label>Visits per Year</label><select id="amcVisits"><option value="4">4</option><option value="6">6</option><option value="12">12</option><option value="24">24</option></select><label>Technician</label><select id="amcTechnician"><option value="">Select</option>${techs.map(t => `<option value="${t.name}">${t.name} — ${t.role || ''}</option>`).join('')}</select><label>Notes</label><textarea id="amcNotes" rows="2"></textarea><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Create</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content"><h3>${iconHtml('amc')} New AMC Contract</h3><label>Client *</label><select id="amcClientId">${clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select><label>Site</label><select id="amcSiteId"><option value="">None</option></select><label>Contract Type</label><select id="amcContractType"><option value="">Select</option><option>HVAC</option><option>MEP</option><option>Electrical</option><option>Plumbing</option><option>Full Facility</option></select><label>Contract Value (AED)</label><input type="number" id="amcValue" step="0.01"><label>Start Date *</label><input type="date" id="amcStart" value="${new Date().toISOString().slice(0,10)}"><label>Expiry Date *</label><input type="date" id="amcExpiry"><label>Visits per Year</label><select id="amcVisits"><option value="4">4</option><option value="6">6</option><option value="12">12</option><option value="24">24</option></select><label>Technician</label><select id="amcTechnician"><option value="">Select</option>${techs.map(t => `<option value="${t.name}">${t.name} — ${t.role || ''}</option>`).join('')}</select><label>Notes</label><textarea id="amcNotes" rows="2"></textarea><div class="modal-actions"><button class="btn-secondary" id="cancelBtn">Cancel</button><button class="btn-primary" id="saveBtn">Create</button></div></div>`;
     document.body.appendChild(modal);
     const clientSelect = document.getElementById('amcClientId');
     const siteSelect = document.getElementById('amcSiteId');
@@ -1255,18 +2223,116 @@
       const startDate = document.getElementById('amcStart').value;
       if (!clientId || !expiry || !startDate) { showToast('Client, Start Date and Expiry required', 'error'); return; }
       await fetchAPI('/amcs', { method: 'POST', body: JSON.stringify({ clientId, clientName, site_id: document.getElementById('amcSiteId').value || null, contract_type: document.getElementById('amcContractType').value, contract_value: parseFloat(document.getElementById('amcValue').value) || null, start_date: startDate, expiry, visits_per_year: parseInt(document.getElementById('amcVisits').value), technician: document.getElementById('amcTechnician').value || null, notes: document.getElementById('amcNotes').value, status: 'Active', visits_done: 0 }) });
+      clearCache();
       modal.remove(); renderApp();
     };
   };
 
-  window.showAddServiceModal = async () => { const name = prompt('Enter service name:'); if (name) await fetchAPI('/services', { method: 'POST', body: JSON.stringify({ name }) }); renderApp(); };
-  window.showAddAssetModal = async () => { const name = prompt('Asset name:'); if (!name) return; const asset_type = prompt('Asset type:'); await fetchAPI('/assets', { method: 'POST', body: JSON.stringify({ name, asset_type }) }); renderApp(); };
-  window.showAddQuotationModal = async () => { const clients = await fetchAPI('/clients'); const client_id = prompt(`Client ID (${clients.map(c => c.id).join(', ')}):`); if (client_id) await fetchAPI('/quotations', { method: 'POST', body: JSON.stringify({ client_id, date: new Date().toISOString().slice(0,10), line_items: [] }) }); renderApp(); };
-  window.updateJobStatus = async (id) => { const newStatus = prompt('Update status (Assigned / In Progress / Completed):', 'In Progress'); if (newStatus) await fetchAPI(`/jobs/${id}`, { method: 'PUT', body: JSON.stringify({ status: newStatus }) }); renderApp(); };
-  window.deleteCustomer = async (id) => { if (confirm('Delete this customer?')) { await fetchAPI(`/clients/${id}`, { method: 'DELETE' }); renderApp(); } };
-  window.deleteSite = async (id) => { if (confirm('Delete this site?')) { await fetchAPI(`/sites/${id}`, { method: 'DELETE' }); renderApp(); } };
-  window.deleteTechnician = async (id) => { if (confirm('Delete this technician?')) { await fetchAPI(`/technicians/${id}`, { method: 'DELETE' }); renderApp(); } };
-  window.deleteService = async (id) => { if (confirm('Delete this service?')) { await fetchAPI(`/services/${id}`, { method: 'DELETE' }); renderApp(); } };
+  window.deleteAsset = async (id) => {
+    if (confirm('Delete this asset?')) {
+      await fetchAPI(`/assets/${id}`, { method: 'DELETE' });
+      clearCache();
+      renderApp();
+    }
+  };
+
+  window.viewQuotationDetails = async (id) => {
+    const quote = await fetchAPI(`/quotations/${id}`);
+    const sym = user?.currency === 'EUR' ? '€' : 'AED';
+    const modal = document.createElement('div'); modal.className = 'modal'; modal.style.display = 'flex';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 600px;">
+        <h3>${iconHtml('quotations')} Quotation Details</h3>
+        <div style="background: var(--surface-2); padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div><strong>Quote #:</strong> ${quote.quote_number}</div>
+            <div><strong>Client:</strong> ${quote.client_name || '-'}</div>
+            <div><strong>Date:</strong> ${quote.date ? new Date(quote.date).toLocaleDateString() : '-'}</div>
+            <div><strong>Valid Until:</strong> ${quote.valid_until ? new Date(quote.valid_until).toLocaleDateString() : '-'}</div>
+            <div><strong>Status:</strong> ${quote.status || 'Draft'}</div>
+            <div><strong>Total:</strong> ${sym} ${(quote.total || 0).toLocaleString()}</div>
+          </div>
+        </div>
+        <h4>${iconHtml('tasks')} Line Items</h4>
+        <div style="max-height: 250px;">
+          ${quote.line_items && quote.line_items.length > 0 ? `
+            <table style="width:100%;">
+              <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th class="amount-cell">Total</th></tr></thead>
+              <tbody>
+                ${quote.line_items.map(item => `
+                  <tr>
+                    <td>${item.description}</td>
+                    <td>${item.quantity}</td>
+                    <td>${sym} ${item.unit_price}</td>
+                    <td class="amount-cell">${sym} ${item.total}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          ` : '<div class="empty">No line items</div>'}
+        </div>
+        ${quote.notes ? `<div style="margin-top: 16px;"><strong>Notes:</strong> ${quote.notes}</div>` : ''}
+        <div class="modal-actions"><button class="btn-primary" id="closeDetailsBtn">Close</button></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('closeDetailsBtn').onclick = () => modal.remove();
+  };
+
+  window.convertQuotationToJob = async (id) => {
+    if (confirm('Convert this quotation to a job?')) {
+      try {
+        await fetchAPI(`/quotations/${id}/convert-to-job`, { method: 'POST' });
+        showToast('Quotation converted to job!', 'success');
+        clearCache();
+        renderApp();
+      } catch (err) {
+        showToast('Error converting: ' + err.message, 'error');
+      }
+    }
+  };
+
+  window.updateJobStatus = async (id) => {
+    const newStatus = prompt('Update status (Assigned / In Progress / Completed):', 'In Progress');
+    if (newStatus) {
+      await fetchAPI(`/jobs/${id}`, { method: 'PUT', body: JSON.stringify({ status: newStatus }) });
+      clearCache();
+      renderApp();
+    }
+  };
+
+  window.deleteCustomer = async (id) => {
+    if (confirm('Delete this customer?')) {
+      await fetchAPI(`/clients/${id}`, { method: 'DELETE' });
+      clearCache();
+      renderApp();
+    }
+  };
+
+  window.deleteSite = async (id) => {
+    if (confirm('Delete this site?')) {
+      await fetchAPI(`/sites/${id}`, { method: 'DELETE' });
+      clearCache();
+      renderApp();
+    }
+  };
+
+  window.deleteTechnician = async (id) => {
+    if (confirm('Delete this technician?')) {
+      await fetchAPI(`/technicians/${id}`, { method: 'DELETE' });
+      clearCache();
+      renderApp();
+    }
+  };
+
+  window.deleteService = async (id) => {
+    if (confirm('Delete this service?')) {
+      await fetchAPI(`/services/${id}`, { method: 'DELETE' });
+      clearCache();
+      renderApp();
+    }
+  };
+
   window.viewCustomerSites = (id) => { renderApp(); };
 
   window.toggleSidebar = toggleSidebar;
