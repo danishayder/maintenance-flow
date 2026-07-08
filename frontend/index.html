@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
   <title>MaintenanceFlow PRO | Live Maintenance Ops</title>
   
   <!-- Google Fonts: Syne (headings) + Inter (numbers) + DM Sans (body) -->
@@ -47,7 +47,7 @@
     }
 
     /* ============================================================
-       FIX #1: NUMBERS FONT (Inter) + Right-Aligned Currency
+       NUMBERS FONT (Inter) + Right-Aligned Currency
        ============================================================ */
     .stat-value,
     .kpi-value,
@@ -70,7 +70,7 @@
     }
 
     /* ============================================================
-       FIX #2: SVG ICONS (Replaces Emojis)
+       SVG ICONS
        ============================================================ */
     .icon {
       display: inline-flex;
@@ -105,7 +105,7 @@
     .btn-secondary .icon { color: var(--text-muted); }
 
     /* ============================================================
-       FIX #3: SIDEBAR LOGO (Branding)
+       SIDEBAR LOGO
        ============================================================ */
     .sidebar-logo {
       padding: 28px 24px;
@@ -147,7 +147,7 @@
     }
 
     /* ============================================================
-       FIX #4: RESPONSIVE LAYOUT - Better Grid Breakpoints
+       RESPONSIVE LAYOUT - Grid Breakpoints
        ============================================================ */
     .stats-grid {
       display: grid;
@@ -198,197 +198,7 @@
     }
 
     /* ============================================================
-       FIX #5: MOBILE RESPONSIVE BREAKPOINTS
-       ============================================================ */
-    @media (max-width: 1024px) {
-      .main-grid { grid-template-columns: 1fr; }
-      .bottom-grid { grid-template-columns: 1fr; }
-      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-        width: 280px;
-      }
-      .sidebar.open { transform: translateX(0); }
-      .main-content {
-        margin-left: 0;
-        padding: 70px 12px 16px 12px;
-      }
-      .mobile-menu-btn { display: block; }
-      .sidebar-overlay.open { display: block; }
-
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-      }
-      .stat-value { font-size: 1.6rem; }
-
-      .contracts-grid,
-      .customers-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .kpi-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-
-      .actions-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .header {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 16px;
-      }
-      .header-actions {
-        width: 100%;
-        flex-wrap: wrap;
-      }
-      .header-actions .btn-primary,
-      .header-actions .btn-secondary {
-        flex: 1;
-        min-width: 120px;
-        text-align: center;
-        font-size: 0.8rem;
-        padding: 8px 12px;
-      }
-
-      .filters-row {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .filter-input,
-      .filter-select {
-        width: 100%;
-        min-width: unset;
-      }
-
-      .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      table {
-        min-width: 500px;
-        font-size: 0.75rem;
-      }
-
-      .modal-content {
-        padding: 16px;
-        width: 95%;
-        margin: 20px auto;
-      }
-
-      .line-items-header,
-      .line-item-row {
-        grid-template-columns: 2fr 1fr 1fr;
-        gap: 8px;
-        font-size: 0.7rem;
-      }
-      .line-items-header span:nth-child(4),
-      .line-items-header span:nth-child(5),
-      .line-item-row .line-item-total,
-      .line-item-row .btn-remove {
-        display: none;
-      }
-
-      .customer-info-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .contract-details {
-        grid-template-columns: 1fr;
-      }
-
-      .contract-footer {
-        flex-wrap: wrap;
-      }
-      .contract-footer .btn-sm {
-        flex: 1 1 calc(50% - 4px);
-        min-width: 80px;
-      }
-
-      .customer-footer {
-        flex-wrap: wrap;
-      }
-      .customer-footer .btn-sm {
-        flex: 1 1 calc(50% - 4px);
-        min-width: 70px;
-        font-size: 0.65rem;
-        padding: 6px 8px;
-      }
-
-      .visit-item {
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-      .visit-date {
-        min-width: 44px;
-        padding: 6px 10px;
-      }
-      .visit-date-day { font-size: 0.9rem; }
-      .visit-tech { font-size: 0.6rem; padding: 2px 8px; }
-
-      .dispatch-card {
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .amc-item {
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .toast {
-        bottom: 16px;
-        right: 16px;
-        left: 16px;
-        max-width: unset;
-        font-size: 0.8rem;
-        padding: 12px 16px;
-      }
-
-      .chart-bars {
-        gap: 6px;
-        height: 120px;
-      }
-      .bar-amount { font-size: 0.55rem; }
-      .bar-label { font-size: 0.6rem; }
-    }
-
-    @media (max-width: 480px) {
-      .stats-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-      .stat-card { padding: 14px; }
-      .stat-value { font-size: 1.3rem; }
-      .stat-label { font-size: 0.6rem; }
-
-      .header h1 { font-size: 1.1rem; }
-      .header-icon { width: 36px; height: 36px; }
-      .header-icon svg { width: 18px; height: 18px; }
-
-      .card { padding: 14px; }
-      .card-title { font-size: 0.85rem; }
-
-      .sidebar { width: 260px; }
-      .sidebar-logo { padding: 20px 16px; }
-      .sidebar-logo .logo-icon { width: 34px; height: 34px; }
-      .sidebar-logo .logo-text h2 { font-size: 1rem; }
-      .nav-item { padding: 10px 16px; font-size: 0.8rem; gap: 10px; }
-
-      .modal-content { padding: 14px; }
-      .modal-content h3 { font-size: 1.1rem; }
-    }
-
-    /* ============================================================
-       EXISTING STYLES (Kept as-is)
+       EXISTING STYLES
        ============================================================ */
     .login-container { max-width: 420px; margin: 100px auto; background: var(--surface); padding: 40px; border-radius: var(--radius); box-shadow: var(--shadow-md); text-align: center; border: 1px solid var(--border); }
     .login-container h2 { font-family: 'Syne', sans-serif; font-size: 1.8rem; margin-bottom: 10px; }
@@ -553,8 +363,45 @@
     .empty { text-align: center; padding: 40px; color: var(--text-muted); }
     .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
     
-    .mobile-menu-btn { display: none; position: fixed; top: 16px; left: 16px; z-index: 201; background: var(--text); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; }
-    .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; }
+    /* ============================================================
+       MOBILE MENU BUTTON - UPDATED
+       ============================================================ */
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1001;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1.3rem;
+      box-shadow: var(--shadow-md);
+      min-width: 48px;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+    }
+    .mobile-menu-btn:active {
+      transform: scale(0.92);
+    }
+    
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+    }
+    .sidebar-overlay.open {
+      display: block;
+    }
     
     .visits-list { display: flex; flex-direction: column; gap: 12px; }
     .visit-item { display: flex; align-items: center; gap: 14px; padding: 12px; border: 1.5px solid var(--border); border-radius: 14px; transition: all 0.2s; flex-wrap: wrap; }
@@ -621,6 +468,268 @@
     .totals-inner { width: 280px; border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden; max-width: 100%; }
     .totals-row { display: flex; justify-content: space-between; padding: 10px 16px; font-size: 0.85rem; border-bottom: 1px solid var(--border); }
     .totals-row:last-child { border-bottom: none; background: var(--surface-2); font-weight: 700; font-family: 'Syne', sans-serif; }
+
+    /* ============================================================
+       MOBILE RESPONSIVE BREAKPOINTS (UPDATED)
+       ============================================================ */
+    @media (max-width: 1024px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .bottom-grid { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn { display: flex !important; }
+      
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        width: 280px;
+        box-shadow: 2px 0 30px rgba(0,0,0,0.3);
+      }
+      .sidebar.open { transform: translateX(0); }
+      
+      .sidebar-overlay.open { display: block; }
+      
+      .main-content {
+        margin-left: 0;
+        padding: 76px 12px 16px 12px;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .stat-value { font-size: 1.6rem; }
+      .stat-card { padding: 14px 16px; }
+      
+      .contracts-grid,
+      .customers-grid {
+        grid-template-columns: 1fr;
+      }
+      .kpi-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .actions-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 14px 16px;
+        gap: 10px;
+        border-radius: 16px;
+      }
+      .header-brand { gap: 10px; }
+      .header h1 { font-size: 1.1rem; }
+      .header-icon { width: 36px; height: 36px; }
+      .header-icon svg { width: 18px; height: 18px; }
+      .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .header-actions .btn-primary,
+      .header-actions .btn-secondary {
+        flex: 1;
+        min-width: 100px;
+        font-size: 0.75rem;
+        padding: 8px 12px;
+        justify-content: center;
+        min-height: 40px;
+      }
+      .user-info {
+        width: 100%;
+        justify-content: space-between;
+        font-size: 0.75rem;
+      }
+      
+      .filters-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+      .filter-group { min-width: unset; flex: 1; }
+      .filter-input,
+      .filter-select {
+        width: 100%;
+        min-height: 40px;
+        font-size: 0.85rem;
+      }
+      
+      .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -8px;
+        padding: 0 8px;
+      }
+      table {
+        min-width: 500px;
+        font-size: 0.75rem;
+      }
+      thead th { font-size: 0.6rem; padding: 8px 6px; }
+      tbody td { padding: 10px 6px; font-size: 0.75rem; }
+      
+      .modal {
+        padding: 12px;
+        align-items: flex-end;
+      }
+      .modal-content {
+        padding: 16px;
+        width: 100%;
+        max-height: 92vh;
+        border-radius: var(--radius) var(--radius) 0 0;
+        margin: 0;
+      }
+      .modal-content h3 { font-size: 1.1rem; }
+      .modal-actions {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .modal-actions .btn-primary,
+      .modal-actions .btn-secondary {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+      }
+      
+      .line-items-header,
+      .line-item-row {
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 6px;
+        font-size: 0.7rem;
+      }
+      .line-items-header span:nth-child(4),
+      .line-items-header span:nth-child(5),
+      .line-item-row .line-item-total,
+      .line-item-row .btn-remove {
+        display: none;
+      }
+      
+      .customer-info-grid { grid-template-columns: 1fr; }
+      .customer-footer .btn-sm {
+        flex: 1 1 calc(50% - 4px);
+        min-width: 60px;
+        font-size: 0.65rem;
+        padding: 6px 8px;
+        min-height: 32px;
+      }
+      
+      .contract-details { grid-template-columns: 1fr; }
+      .contract-footer .btn-sm {
+        flex: 1 1 calc(50% - 4px);
+        min-width: 70px;
+        font-size: 0.65rem;
+        padding: 6px 10px;
+        min-height: 32px;
+      }
+      .contract-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .dispatch-card,
+      .amc-item,
+      .visit-item {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 14px;
+      }
+      .visit-date {
+        min-width: 40px;
+        padding: 4px 10px;
+      }
+      .visit-date-day { font-size: 0.85rem; }
+      .visit-tech { font-size: 0.6rem; padding: 2px 8px; }
+      
+      .toast {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+        max-width: unset;
+        font-size: 0.8rem;
+        padding: 12px 16px;
+        border-radius: 12px;
+      }
+      
+      .chart-bars {
+        gap: 6px;
+        height: 120px;
+      }
+      .bar-amount { font-size: 0.55rem; }
+      .bar-label { font-size: 0.6rem; }
+      
+      .login-container {
+        margin: 40px 16px;
+        padding: 32px 20px;
+      }
+      .login-container h2 { font-size: 1.5rem; }
+      
+      .card { padding: 16px; border-radius: 16px; }
+      .card-title { font-size: 0.9rem; }
+      
+      .btn-primary,
+      .btn-secondary,
+      .btn-outline {
+        padding: 8px 14px;
+        font-size: 0.8rem;
+        min-height: 40px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .stat-card { padding: 12px; }
+      .stat-value { font-size: 1.3rem; }
+      .stat-label { font-size: 0.6rem; }
+      
+      .sidebar { width: 260px; }
+      .sidebar-logo { padding: 16px 20px; }
+      .sidebar-logo .logo-icon { width: 34px; height: 34px; }
+      .sidebar-logo .logo-text h2 { font-size: 1rem; }
+      .nav-item {
+        padding: 10px 16px;
+        font-size: 0.8rem;
+        gap: 10px;
+        min-height: 40px;
+      }
+      
+      .main-content { padding: 68px 8px 12px 8px; }
+      
+      .header h1 { font-size: 0.95rem; }
+      .header-actions .btn-primary,
+      .header-actions .btn-secondary {
+        font-size: 0.7rem;
+        padding: 6px 10px;
+        min-height: 34px;
+        min-width: 80px;
+      }
+      
+      .actions-grid { grid-template-columns: 1fr; }
+      
+      .modal-content { padding: 14px; }
+      .modal-content h3 { font-size: 1rem; }
+      
+      .customer-top { gap: 10px; }
+      .customer-avatar {
+        width: 38px;
+        height: 38px;
+        font-size: 0.8rem;
+      }
+      .customer-name { font-size: 0.9rem; }
+      
+      .toast {
+        padding: 10px 14px;
+        font-size: 0.75rem;
+      }
+      .toast-icon { font-size: 1.2rem; }
+    }
   </style>
 </head>
 <body>
@@ -628,7 +737,7 @@
 
 <script>
   // ============================================================
-  // FIX #6: PERFORMANCE - Cached API Data
+  // PERFORMANCE - Cached API Data
   // ============================================================
   let cachedData = {
     clients: null,
@@ -713,17 +822,36 @@
   }
 
   // ============================================================
-  // AUTH FUNCTIONS
+  // SIDEBAR TOGGLE (UPDATED FOR MOBILE)
   // ============================================================
-  function toggleSidebar() { sidebarOpen = !sidebarOpen; updateSidebar(); }
-  function closeSidebar() { sidebarOpen = false; updateSidebar(); }
+  function toggleSidebar() {
+    sidebarOpen = !sidebarOpen;
+    updateSidebar();
+  }
+
+  function closeSidebar() {
+    sidebarOpen = false;
+    updateSidebar();
+  }
+
   function updateSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.querySelector('.sidebar-overlay');
     if (sidebar) sidebar.classList.toggle('open', sidebarOpen);
     if (overlay) overlay.classList.toggle('open', sidebarOpen);
+    document.body.style.overflow = sidebarOpen ? 'hidden' : '';
   }
 
+  // Close sidebar on escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && sidebarOpen) {
+      closeSidebar();
+    }
+  });
+
+  // ============================================================
+  // AUTH FUNCTIONS
+  // ============================================================
   async function login(email, password) {
     try {
       const res = await fetch(API + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
@@ -914,7 +1042,7 @@
     ];
 
     document.getElementById('app').innerHTML = `
-      <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
       <div class="sidebar-overlay" onclick="closeSidebar()"></div>
       <div class="app-container">
         <div class="sidebar">
@@ -955,7 +1083,8 @@
     document.querySelectorAll('.nav-item[data-page]').forEach(el => {
       el.addEventListener('click', () => {
         currentPage = el.dataset.page;
-        sidebarOpen = false; updateSidebar();
+        sidebarOpen = false;
+        updateSidebar();
         renderApp();
       });
     });
@@ -1386,7 +1515,7 @@
       `;
     }
     
-    // ==================== SERVICES PAGE (FIXED) ====================
+    // ==================== SERVICES PAGE ====================
     else if (currentPage === 'services') {
       container.innerHTML = `
         <div class="card">
@@ -1415,7 +1544,7 @@
       `;
     }
     
-    // ==================== ASSETS PAGE (FIXED) ====================
+    // ==================== ASSETS PAGE ====================
     else if (currentPage === 'assets') {
       container.innerHTML = `
         <div class="card">
@@ -1449,7 +1578,7 @@
       `;
     }
     
-    // ==================== QUOTATIONS PAGE (FIXED) ====================
+    // ==================== QUOTATIONS PAGE ====================
     else if (currentPage === 'quotations') {
       container.innerHTML = `
         <div class="card">
@@ -1498,9 +1627,6 @@
   // MODAL FUNCTIONS
   // ============================================================
 
-  // ============================================================
-  // FIX: ADD ASSET MODAL (Complete)
-  // ============================================================
   window.showAddAssetModal = async () => {
     const [clients, sites] = await Promise.all([
       fetchWithCache('/clients'),
@@ -1624,9 +1750,6 @@
     };
   };
 
-  // ============================================================
-  // FIX: ADD SERVICE MODAL
-  // ============================================================
   window.showAddServiceModal = async () => {
     const modal = document.createElement('div');
     modal.className = 'modal';
@@ -1678,9 +1801,6 @@
     };
   };
 
-  // ============================================================
-  // FIX: ADD QUOTATION MODAL (Complete)
-  // ============================================================
   window.showAddQuotationModal = async () => {
     const clients = await fetchWithCache('/clients');
     const services = await fetchWithCache('/services');
@@ -1890,7 +2010,7 @@
   };
 
   // ============================================================
-  // HELPER FUNCTIONS (Existing)
+  // HELPER FUNCTIONS
   // ============================================================
   
   window.viewAmcDetails = async (id) => {
